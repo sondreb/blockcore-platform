@@ -8,7 +8,7 @@ namespace Blockcore.Platform.Networking
 {
     public class GatewayManager
     {
-        private int port = 4366;
+        private int port;
         private IPEndPoint tcpEndpoint;
         private TcpListener tcp;
         public IPEndPoint udpEndpoint;
@@ -23,7 +23,7 @@ namespace Blockcore.Platform.Networking
             MessageSerializer messageSerializer,
             ConnectionManager connectionManager)
         {
-            this.port = 5060;
+            this.port = 6610; // Currently not used in the port list: https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
             this.log = log;
             this.messageSerializer = messageSerializer;
             this.Connections = connectionManager;
