@@ -27,12 +27,12 @@ namespace Blockcore.Platform.Networking.Handlers
                 if (hubInfo != null)
                 {
                     manager.Connections.RemoveConnection(hubInfo);
-                    hub.Publish(new ConnectionRemovedEvent() { Data = hubInfo });
+                    hub.Publish(new ConnectionRemovedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage() });
                 }
             }
             else if (item.Type == NotificationsTypes.ServerShutdown)
             {
-                manager.DisconnectedGateway();
+                manager.DisconnectGateway();
                 hub.Publish(new GatewayShutdownEvent());
             }
         }

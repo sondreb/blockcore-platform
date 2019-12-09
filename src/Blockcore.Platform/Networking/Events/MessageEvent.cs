@@ -2,7 +2,7 @@
 
 namespace Blockcore.Platform.Networking.Events
 {
-    public class MessageReceivedEvent
+    public class MessageReceivedEvent : IEvent
     {
         public string From { get; set; }
 

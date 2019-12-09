@@ -1,12 +1,11 @@
-﻿using Blockcore.Platform.Networking.Entities;
-using System.Net;
+﻿using Blockcore.Platform.Networking.Messages;
 
 namespace Blockcore.Platform.Networking.Events
 {
-    public class ConnectionStartedEvent
+    public class ConnectionStartedEvent : IEvent
     {
-        public HubInfo Data { get; set; }
+        public HubInfoMessage Data { get; set; }
 
-        public IPEndPoint Endpoint { get; set; }
+        public string Endpoint { get; set; }
     }
 }

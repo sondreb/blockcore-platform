@@ -1,9 +1,9 @@
-﻿using Blockcore.Platform.Networking.Entities;
+﻿using Blockcore.Platform.Networking.Messages;
 
 namespace Blockcore.Platform.Networking.Events
 {
-    public class ConnectionUpdatedEvent
+    public class ConnectionUpdatedEvent : IEvent
     {
-        public HubInfo Data { get; set; }
+        public HubInfoMessage Data { get; set; }
     }
 }

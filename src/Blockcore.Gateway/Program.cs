@@ -1,6 +1,7 @@
-﻿using Blockcore.Platform.Networking;
-using System;
-using System.Threading;
+﻿using Blockcore.Platform;
+using Blockcore.Platform.Networking;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Blockcore.Gateway
 {
@@ -8,14 +9,29 @@ namespace Blockcore.Gateway
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Blockcore Gateway Starting...");
-            var host = GatewayHost.Start(args);
-            Console.WriteLine("Blockcore Gateway Started.");
-            Console.WriteLine("Press enter to exit.");
-            Console.ReadLine();
-
-            host.Stop();
-            Thread.Sleep(3000);
+            CreateHostBuilder(args).Build().Run();
         }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) => Host.CreateDefaultBuilder(args)
+        .ConfigureServices((hostContext, services) =>
+        {
+            services.AddHostedService<GatewayWorker>();
+
+            services.AddSingleton<GatewayHost>();
+            services.AddSingleton<IMessageProcessingBase, MessageProcessing>();
+            services.AddSingleton<GatewayManager>();
+            services.AddSingleton<MessageSerializer>();
+            services.AddSingleton<MessageMaps>();
+            services.AddSingleton<ConnectionManager>();
+            services.AddLogging();
+
+            // TODO: This should likely be updated in the future to allow third-party plugin assemblies to be loaded as well.
+            // Register all handlers in executing assembly.
+            typeof(IMessageGatewayHandler).Assembly.GetTypesImplementing<IMessageGatewayHandler>().ForEach((t) =>
+            {
+                services.AddSingleton(typeof(IMessageHandler), t);
+            });
+
+        });
     }
 }

@@ -31,13 +31,13 @@ namespace Blockcore.Platform.Networking.Handlers
                     hubInfo = new HubInfo(msg);
                     manager.Connections.AddConnection(hubInfo);
 
-                    hub.Publish(new ConnectionAddedEvent() { Data = hubInfo });
+                    hub.Publish(new ConnectionAddedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage() });
                 }
                 else
                 {
                     hubInfo.Update(msg);
 
-                    hub.Publish(new ConnectionUpdatedEvent() { Data = hubInfo });
+                    hub.Publish(new ConnectionUpdatedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage() });
                 }
             }
         }

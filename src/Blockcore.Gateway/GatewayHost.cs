@@ -1,56 +1,15 @@
-﻿using Blockcore.Platform.Networking.Entities;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Blockcore.Platform.Networking;
+using Blockcore.Platform.Networking.Entities;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Blockcore.Platform.Networking
+namespace Blockcore.Gateway
 {
     public class GatewayHost
     {
-        // TODO: Consider changing to using the host model/framework and IService. For now, this will suffice.
-        public static GatewayHost Start(string[] args)
-        {
-            //setup our DI
-            var serviceProvider = new ServiceCollection();
-
-            serviceProvider.AddSingleton<GatewayHost>();
-            serviceProvider.AddSingleton<IMessageProcessingBase, MessageProcessing>();
-            serviceProvider.AddSingleton<GatewayManager>();
-            serviceProvider.AddSingleton<MessageSerializer>();
-            serviceProvider.AddSingleton<MessageMaps>();
-            serviceProvider.AddSingleton<ConnectionManager>();
-            serviceProvider.AddLogging();
-
-            // TODO: This should likely be updated in the future to allow third-party plugin assemblies to be loaded as well.
-            // Register all handlers in executing assembly.
-            Assembly.GetExecutingAssembly().GetTypesImplementing<IMessageGatewayHandler>().ForEach((t) =>
-            {
-                serviceProvider.AddSingleton(typeof(IMessageHandler), t);
-            });
-
-            var services = serviceProvider.BuildServiceProvider();
-
-            //configure console logging
-            services.GetService<ILoggerFactory>();
-
-            var logger = services.GetService<ILoggerFactory>().CreateLogger<GatewayHost>();
-            logger.LogInformation("Starting application");
-
-            CancellationTokenSource token = new CancellationTokenSource();
-
-            //do the actual work here
-            var host = services.GetService<GatewayHost>();
-            host.Launch(args);
-
-            logger.LogInformation("All done!");
-
-            return host;
-        }
-
         private readonly ILogger<GatewayHost> log;
         private readonly IMessageProcessingBase messageProcessing;
         private readonly MessageSerializer messageSerializer;
@@ -68,12 +27,10 @@ namespace Blockcore.Platform.Networking
             this.connectionManager = connectionManager;
         }
 
-        public void Launch(string[] args)
+        public void Launch(CancellationToken token)
         {
             // Prepare the messaging processors for message handling.
             this.messageProcessing.Build();
-
-            var token = CancellationToken.None;
 
             Task tcpTask = Task.Run(() => {
                 TcpWorker(token);

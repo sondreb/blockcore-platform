@@ -1,0 +1,160 @@
+﻿<html>
+<head>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: rgb(141,145,166);
+            background: linear-gradient(145deg, rgba(141,145,166,1) 0%, rgba(104,108,129,1) 61%, rgba(56,59,80,1) 100%);
+            color: white;
+            overflow: hidden;
+            overflow-y: scroll;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+        }
+
+        .app {
+            margin: 20px;
+        }
+
+        .hub {
+            font-size: 1.1rem;
+            background-color: silver;
+            padding: 20px 0;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid gray;
+        }
+
+            .hub:hover {
+                background-color: gray;
+                border: 1px solid white;
+            }
+
+        .hub-ip {
+        }
+
+        .grid-container {
+            margin: 20px;
+            display: grid;
+            grid-template-columns: 0.2fr 2.2fr 0.6fr;
+            grid-template-rows: 0.2fr 2.6fr 1.1fr 0.1fr;
+            grid-template-areas: "logo toolbar list-header" "menul main list" "menul main details" "footer footer footer";
+        }
+
+        .menu {
+            grid-area: menu;
+        }
+
+        .logo {
+            grid-area: logo;
+            margin-bottom: 10px;
+        }
+
+        .toolbar {
+            grid-area: toolbar;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            /*justify-content: center;*/
+        }
+
+        .main {
+            grid-area: main;
+        }
+
+        .footer {
+            grid-area: footer;
+            text-align: center;
+        }
+
+        .details {
+            grid-area: details;
+            background-color: gray;
+            padding: 10px;
+            border-left: 1px solid silver;
+            border-right: 1px solid silver;
+            border-bottom: 1px solid silver;
+        }
+
+        .list {
+            grid-area: list;
+            border: 1px solid silver;
+        }
+
+        .list-header {
+            grid-area: list-header;
+            margin-bottom: 10px;
+        }
+
+        h2, h3 {
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+
+        }
+
+        .log {
+            width: 600px;
+            font-size: 0.9rem;
+            border: 1px solid silver;
+            overflow: scroll;
+            padding: 10px;
+            height: 500px;
+        }
+
+        .disconnected, .connected {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+        }
+
+        .disconnected {
+            background-color: red;
+        }
+
+        .connected {
+            background-color: green;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="grid-container">
+        <div class="menu"></div>
+        <div class="logo"></div>
+        <div class="toolbar">
+            <input type="text" name="server" id="server" value="127.0.0.1:5060" />
+            <span id="status" class="disconnected"></span>
+            <button onclick="connect();">Connect to Gateway</button>
+            <button onclick="disconnect();">Disconnect from Gateway</button>
+        </div>
+        <div class="main">
+
+            <h1>Blockcore Hub</h1>
+
+            <h2>Log (last on top)</h2>
+            <div class="log" id="log"></div>
+
+        </div>
+        <div class="list-header"><h2>Hubs</h2></div>
+        <div class="list" id="list">
+            <!--<div class="hub">WHITE <span class="hub-ip">(192.168.1.0)</span></div>-->
+        </div>
+        <div class="details">
+            <div id="details"></div>
+            <button id="connect-button" onclick="connectToHub();">Connect to Hub</button>
+        </div>
+        <div class="footer">
+            Made with 💖 by Blockcore
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+</html>

@@ -40,7 +40,7 @@ namespace Blockcore.Platform.Networking.Handlers
 
                     CI.ExternalEndpoint.Port = EP.Port;
 
-                    hub.Publish(new ConnectionUpdatedEvent() { Data = CI });
+                    hub.Publish(new ConnectionUpdatedEvent() { Data = (HubInfoMessage)CI.ToMessage() });
                 }
 
                 List<string> IPs = new List<string>();

@@ -1,5 +1,6 @@
 ﻿using Blockcore.Platform.Networking.Entities;
 using Blockcore.Platform.Networking.Events;
+using Blockcore.Platform.Networking.Messages;
 using Microsoft.Extensions.Logging;
 using PubSub;
 using System;
@@ -14,7 +15,7 @@ namespace Blockcore.Platform.Networking
 {
     public class HubManager
     {
-        public IPEndPoint ServerEndpoint { get; }
+        public IPEndPoint ServerEndpoint { get; private set; }
 
         public HubInfo LocalHubInfo { get; }
 
@@ -66,7 +67,7 @@ namespace Blockcore.Platform.Networking
             this.log = log;
             this.messageSerializer = messageSerializer;
             this.Connections = connectionManager;
-            this.ServerEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 5060);
+            
             this.LocalHubInfo = new HubInfo();
             this.AckResponces = new List<Ack>();
 
@@ -86,10 +87,14 @@ namespace Blockcore.Platform.Networking
             }
         }
 
-        public void ConnectGateway()
+        public void ConnectGateway(string server)
         {
             try
             {
+                this.log.LogInformation("Connectiong to supplied server: " + server);
+
+                this.ServerEndpoint = IPEndPoint.Parse(server);
+
                 internetAccessAdapter = GetAdapterWithInternetAccess();
 
                 this.log.LogInformation("Adapter with Internet Access: " + internetAccessAdapter);
@@ -118,7 +123,7 @@ namespace Blockcore.Platform.Networking
                 keepAlive.IsBackground = true;
                 keepAlive.Start();
 
-                hub.Publish(new GatewayConnectedEvent());
+                hub.Publish(new GatewayConnectedEvent() { Self = (HubInfoMessage)LocalHubInfo.ToMessage(), Name = "Gateway" });
 
             }
             catch (Exception ex)
@@ -127,26 +132,18 @@ namespace Blockcore.Platform.Networking
             }
         }
 
-        public void DisconnectedGateway()
+        public void DisconnectGateway()
         {
-            TCPClient.Client.Disconnect(true);
-
             UDPListen = false;
             TCPListen = false;
 
-            Connections.ClearConnections();
-        }
-
-        public void ConnectOrDisconnect()
-        {
             if (TCPClient.Connected)
             {
-                DisconnectedGateway();
+                TCPClient.Client.Disconnect(true);
             }
-            else
-            {
-                ConnectGateway();
-            }
+
+            Connections.ClearConnections();
+            hub.Publish(new GatewayDisconnectedEvent());
         }
 
         private IPAddress GetAdapterWithInternetAccess()
@@ -292,7 +289,7 @@ namespace Blockcore.Platform.Networking
                 {
                     this.log.LogInformation("Connection Successfull to: " + responsiveEndpoint.ToString());
 
-                    hub.Publish(new ConnectionStartedEvent() { Data = hubInfo, Endpoint = responsiveEndpoint });
+                    hub.Publish(new ConnectionStartedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage(), Endpoint = responsiveEndpoint.ToString() });
                 }
             }));
 

@@ -2,7 +2,7 @@
 
 namespace Blockcore.Platform.Networking.Events
 {
-    public class HubInfoEvent
+    public class HubInfoEvent : IEvent
     {
         public HubInfoMessage Data { get; set; }
     }

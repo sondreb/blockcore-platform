@@ -24,14 +24,14 @@ namespace Blockcore.Platform.Networking.Handlers
 
             if (hubInfo != null)
             {
-                hub.Publish(new ConnectionStartingEvent() { Data = hubInfo });
+                hub.Publish(new ConnectionStartingEvent() { Data = (HubInfoMessage)hubInfo.ToMessage() });
 
                 IPEndPoint ResponsiveEP = manager.FindReachableEndpoint(hubInfo);
 
                 if (ResponsiveEP != null)
                 {
-                    hub.Publish(new ConnectionStartedEvent() { Data = hubInfo, Endpoint = ResponsiveEP });
-                    hub.Publish(new ConnectionUpdatedEvent() { Data = hubInfo });
+                    hub.Publish(new ConnectionStartedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage(), Endpoint = ResponsiveEP.ToString() });
+                    hub.Publish(new ConnectionUpdatedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage() });
                 }
             }
         }

@@ -1,57 +1,18 @@
-﻿using Blockcore.Platform.Networking.Events;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Blockcore.Platform.Networking;
+using Blockcore.Platform.Networking.Actions;
+using Blockcore.Platform.Networking.Events;
 using Microsoft.Extensions.Logging;
-using PubSub;
 using System;
-using System.Reflection;
 using System.Threading;
 
-namespace Blockcore.Platform.Networking
+namespace Blockcore.Hub
 {
     public class HubHost
     {
-        public static HubHost Start(string[] args)
-        {
-            //setup our DI
-            var serviceProvider = new ServiceCollection();
-
-            serviceProvider.AddSingleton<HubHost>();
-            serviceProvider.AddSingleton<IMessageProcessingBase, MessageProcessing>();
-            serviceProvider.AddSingleton<HubManager>();
-            serviceProvider.AddSingleton<MessageSerializer>();
-            serviceProvider.AddSingleton<MessageMaps>();
-            serviceProvider.AddSingleton<ConnectionManager>();
-            serviceProvider.AddLogging();
-
-            // Register all handlers.
-            Assembly.GetExecutingAssembly().GetTypesImplementing<IMessageHandler>().ForEach((t) =>
-            {
-                serviceProvider.AddSingleton(typeof(IMessageHandler), t);
-            });
-
-            var services = serviceProvider.BuildServiceProvider();
-
-            //configure console logging
-            services.GetService<ILoggerFactory>();
-
-            var logger = services.GetService<ILoggerFactory>().CreateLogger<GatewayHost>();
-            logger.LogInformation("Starting application");
-
-            CancellationTokenSource token = new CancellationTokenSource();
-
-            //do the actual work here
-            var host = services.GetService<HubHost>();
-            host.Launch(args);
-
-            logger.LogInformation("All done!");
-
-            return host;
-        }
-
         private readonly ILogger<HubHost> log;
         private readonly IMessageProcessingBase messageProcessing;
         private readonly HubManager manager;
-        private readonly Hub hub = Hub.Default;
+        private readonly PubSub.Hub hub = PubSub.Hub.Default;
 
         public HubHost(
             ILogger<HubHost> log,
@@ -66,12 +27,10 @@ namespace Blockcore.Platform.Networking
             this.manager.MessageProcessing = this.messageProcessing;
         }
 
-        public void Launch(string[] args)
+        public void Launch(CancellationToken token)
         {
             // Prepare the messaging processors for message handling.
             this.messageProcessing.Build();
-
-            manager.ConnectGateway();
 
             hub.Subscribe<ConnectionAddedEvent>(this, e =>
             {
@@ -124,14 +83,21 @@ namespace Blockcore.Platform.Networking
             {
                 Console.WriteLine($"MessageReceivedEvent: {e.Data.Content}");
             });
+
+            hub.Subscribe<ConnectGatewayAction>(this, e =>
+            {
+                this.manager.ConnectGateway(e.Server);
+            });
+
+            hub.Subscribe<DisconnectGatewayAction>(this, e =>
+            {
+                this.manager.DisconnectGateway();
+            });
         }
 
         public void Stop()
         {
-            // Hm... we should disconnect our connection to both gateway and nodes, and inform then we are shutting down.
-            // this.connectionManager.Disconnect
-            // We will broadcast a shutdown when we're stopping.
-            // connectionManager.BroadcastTCP(new Notification(NotificationsTypes.ServerShutdown, null));
+            this.manager.DisconnectGateway();
         }
     }
 }
