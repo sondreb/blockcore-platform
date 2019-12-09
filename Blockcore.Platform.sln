@@ -19,8 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blockcore.Gateway", "src\Bl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blockcore.Platform", "src\Blockcore.Platform\Blockcore.Platform.csproj", "{DFD1B229-2E23-4865-ABE7-095543254EF4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebWindowLib", "src\WebWindowLib\WebWindowLib.csproj", "{E19F98C7-7A6C-4542-A40E-3E812C88DED4}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,10 +41,6 @@ Global
 		{DFD1B229-2E23-4865-ABE7-095543254EF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DFD1B229-2E23-4865-ABE7-095543254EF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DFD1B229-2E23-4865-ABE7-095543254EF4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E19F98C7-7A6C-4542-A40E-3E812C88DED4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E19F98C7-7A6C-4542-A40E-3E812C88DED4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E19F98C7-7A6C-4542-A40E-3E812C88DED4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E19F98C7-7A6C-4542-A40E-3E812C88DED4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
