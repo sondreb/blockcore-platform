@@ -93,6 +93,11 @@ namespace Blockcore.Hub
             {
                 this.manager.DisconnectGateway();
             });
+
+            hub.Subscribe<ConnectHubAction>(this, e =>
+            {
+                this.manager.ConnectToClient(e.Id);
+            });
         }
 
         public void Stop()

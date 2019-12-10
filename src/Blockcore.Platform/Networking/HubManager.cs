@@ -77,7 +77,7 @@ namespace Blockcore.Platform.Networking
 
             LocalHubInfo.Name = Environment.MachineName;
             LocalHubInfo.ConnectionType = ConnectionTypes.Unknown;
-            LocalHubInfo.Id = DateTime.Now.Ticks;
+            LocalHubInfo.Id = DateTime.Now.Ticks.ToString();
 
             var IPs = Dns.GetHostEntry(Dns.GetHostName()).AddressList.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork);
 
@@ -271,6 +271,12 @@ namespace Blockcore.Platform.Networking
 
             if (TCPListen)
                 ThreadTCPListen.Start();
+        }
+
+        public void ConnectToClient(string id)
+        {
+            var hubInfo = this.Connections.GetConnection(id);
+            ConnectToClient(hubInfo);
         }
 
         public void ConnectToClient(HubInfo hubInfo)

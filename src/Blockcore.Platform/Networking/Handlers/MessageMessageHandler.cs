@@ -26,13 +26,12 @@ namespace Blockcore.Platform.Networking.Handlers
             //connectionManager.GetConnection(msg.Id);
 
             // TODO: Debug and figure out what to do here.
-            if (msg.Id == 0)
+            if (string.IsNullOrWhiteSpace(msg.Id))
             {
                 hub.Publish(new MessageReceivedEvent() { Data = new Message(msg) });
                 //OnResultsUpdate.Invoke(this, msg.From + ": " + msg.Content);
             }
-
-            if (msg.Id != 0 & endpoint != null & client != null)
+            else if (endpoint != null & client != null)
             {
                 hub.Publish(new MessageReceivedEvent() { Data = new Message(msg) });
                 //OnMessageReceived.Invoke(EP, new MessageReceivedEventArgs(CI, new Message(m), EP));

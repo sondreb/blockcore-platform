@@ -2,6 +2,6 @@
 {
     public class ConnectHubAction : IAction
     {
-        public long Id { get; set; }
+        public string Id { get; set; }
     }
 }

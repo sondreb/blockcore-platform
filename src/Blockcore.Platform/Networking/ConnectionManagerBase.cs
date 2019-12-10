@@ -14,7 +14,7 @@ namespace Blockcore.Platform.Networking
             Connections.Remove(connection);
         }
 
-        public HubInfo GetConnection(long id)
+        public HubInfo GetConnection(string id)
         {
             return Connections.FirstOrDefault(x => x.Id == id);
         }

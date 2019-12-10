@@ -56,6 +56,11 @@ function OnConnectionUpdatedEvent(e) {
     UpdateHubInfo(e);
 }
 
+function OnConnectionRemovedEvent(e) {
+    console.log('OnConnectionRemovedEvent', e);
+    RemoveHubInfo(e);
+}
+
 function OnGatewayDisconnectedEvent(e) {
     console.log('OnGatewayDisconnectedEvent', e);
 
@@ -146,5 +151,24 @@ function UpdateHubInfo(e) {
         }
 
         hub.ConnectionType = targetHub.ConnectionType;
+    }
+}
+
+
+function RemoveHubInfo(e) {
+    var targetHub = e.Data;
+
+    console.log('targetHub:', targetHub);
+
+    var hub = hubs.find((element) => {
+        return element.id === targetHub.Id;
+    });
+
+    console.log('found hub:', hub);
+
+    if (hub) {
+
+        elm('list').removeChild(hub.element);
+        hubs.splice(hubs.indexOf(hub), 1);
     }
 }

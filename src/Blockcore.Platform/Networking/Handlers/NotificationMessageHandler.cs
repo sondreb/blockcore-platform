@@ -22,7 +22,7 @@ namespace Blockcore.Platform.Networking.Handlers
 
             if (item.Type == NotificationsTypes.Disconnected)
             {
-                var hubInfo = manager.Connections.GetConnection(long.Parse(item.Tag.ToString()));
+                var hubInfo = manager.Connections.GetConnection(item.Tag.ToString());
 
                 if (hubInfo != null)
                 {
