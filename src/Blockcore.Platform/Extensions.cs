@@ -1,12 +1,24 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Blockcore.Platform;
+using Blockcore.Platform.Networking;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System;
+using System.Diagnostics;
+using System.IO;
 
 namespace Blockcore.Platform
 {
     public static class Extensions
     {
+
+
         public static List<Type> GetAllTypesImplementingOpenGenericType(this Assembly assembly, Type openGenericType)
         {
             var list = from x in assembly.GetTypes()

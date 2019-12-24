@@ -1,6 +1,8 @@
-﻿using Blockcore.Platform.Networking;
+﻿using Blockcore.Platform;
+using Blockcore.Platform.Networking;
 using Blockcore.Platform.Networking.Entities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Net.Sockets;
 using System.Threading;
@@ -14,14 +16,17 @@ namespace Blockcore.Gateway
         private readonly IMessageProcessingBase messageProcessing;
         private readonly MessageSerializer messageSerializer;
         private readonly GatewayManager connectionManager;
+        private readonly AppSettings options;
 
         public GatewayHost(
             ILogger<GatewayHost> log,
+            AppSettings options,
             IMessageProcessingBase messageProcessing,
             MessageSerializer messageSerializer,
             GatewayManager connectionManager)
         {
             this.log = log;
+            this.options = options;
             this.messageProcessing = messageProcessing;
             this.messageSerializer = messageSerializer;
             this.connectionManager = connectionManager;

@@ -4,6 +4,26 @@
 
 The Blockcore Platform can be used to build distributed apps and systems, that store data and metadata off-chain, but utilize the blockchain for data integrity, data validation and signing.
 
+## Projects
+
+### Blockcore.Runtime
+
+This is a shared library for Blockcore.Gateway and Blockcore.Hub, used to share code that relies on runtime assemblies that 
+should not be referenced in the Blockcore.Platform library.
+
+### Blockcore.Platform
+
+Main shared library, should avoid too many dependencies.
+
+### Blockcore.Gateway
+
+Main app for Gateway hosting.
+
+### Blockcore.Hub
+
+Main app for Hub hosting.
+
+
 ## Functional Background
 
 The functional requirement for developing the Blockcore Platform, is to have a distributed network for exchanging data securely, but that keeps data off the main blockchain.

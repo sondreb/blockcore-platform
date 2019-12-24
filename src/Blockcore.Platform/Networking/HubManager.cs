@@ -54,6 +54,7 @@ namespace Blockcore.Platform.Networking
         private readonly ILogger<HubManager> log;
         private readonly MessageSerializer messageSerializer;
         private readonly Hub hub = Hub.Default;
+        private readonly AppSettings options;
 
         public ConnectionManager Connections { get; }
 
@@ -61,13 +62,15 @@ namespace Blockcore.Platform.Networking
 
         public HubManager(
             ILogger<HubManager> log,
+            AppSettings options,
             ConnectionManager connectionManager,
             MessageSerializer messageSerializer)
         {
             this.log = log;
+            this.options = options;
             this.messageSerializer = messageSerializer;
             this.Connections = connectionManager;
-            
+
             this.LocalHubInfo = new HubInfo();
             this.AckResponces = new List<Ack>();
 
@@ -83,6 +86,7 @@ namespace Blockcore.Platform.Networking
 
             foreach (var IP in IPs)
             {
+                log.LogInformation("Internal Address: {IP}", IP);
                 LocalHubInfo.InternalAddresses.Add(IP);
             }
         }
@@ -149,11 +153,11 @@ namespace Blockcore.Platform.Networking
         private IPAddress GetAdapterWithInternetAccess()
         {
             ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_IP4RouteTable WHERE Destination=\"0.0.0.0\"");
-            
+
             int interfaceIndex = -1;
 
             foreach (var item in searcher.Get())
-            { 
+            {
                 interfaceIndex = Convert.ToInt32(item["InterfaceIndex"]);
             }
 
@@ -164,7 +168,7 @@ namespace Blockcore.Platform.Networking
                 string[] IPAddresses = (string[])item["IPAddress"];
 
                 foreach (string IP in IPAddresses)
-                { 
+                {
                     return IPAddress.Parse(IP);
                 }
             }
@@ -199,7 +203,7 @@ namespace Blockcore.Platform.Networking
             try
             {
                 if (data != null)
-                { 
+                {
                     UDPClient.Send(data, data.Length, endpoint);
                 }
             }
@@ -241,7 +245,7 @@ namespace Blockcore.Platform.Networking
             ThreadUDPListen.IsBackground = true;
 
             if (UDPListen)
-            { 
+            {
                 ThreadUDPListen.Start();
             }
         }
@@ -311,7 +315,7 @@ namespace Blockcore.Platform.Networking
             for (int ip = 0; ip < hubInfo.InternalAddresses.Count; ip++)
             {
                 if (!TCPClient.Connected)
-                { 
+                {
                     break;
                 }
 
@@ -321,7 +325,7 @@ namespace Blockcore.Platform.Networking
                 for (int i = 1; i < 4; i++)
                 {
                     if (!TCPClient.Connected)
-                    { 
+                    {
                         break;
                     }
 
@@ -352,7 +356,7 @@ namespace Blockcore.Platform.Networking
                 for (int i = 1; i < 100; i++)
                 {
                     if (!TCPClient.Connected)
-                    { 
+                    {
                         break;
                     }
 

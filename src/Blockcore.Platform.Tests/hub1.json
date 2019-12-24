@@ -1,0 +1,11 @@
+{
+  "Hub": {
+  },
+  "Logging": {
+    "File": {
+      "Files": [
+        { "Path": "hub1-debug.log" }
+      ]
+    }
+  }
+}

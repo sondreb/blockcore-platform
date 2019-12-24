@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blockcore.Gateway", "src\Bl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blockcore.Platform", "src\Blockcore.Platform\Blockcore.Platform.csproj", "{DFD1B229-2E23-4865-ABE7-095543254EF4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blockcore.Runtime", "src\Blockcore.Runtime\Blockcore.Runtime.csproj", "{D10AA9CB-03F6-42AB-9CBE-0E5B16602957}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,10 @@ Global
 		{DFD1B229-2E23-4865-ABE7-095543254EF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DFD1B229-2E23-4865-ABE7-095543254EF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DFD1B229-2E23-4865-ABE7-095543254EF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D10AA9CB-03F6-42AB-9CBE-0E5B16602957}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D10AA9CB-03F6-42AB-9CBE-0E5B16602957}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D10AA9CB-03F6-42AB-9CBE-0E5B16602957}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D10AA9CB-03F6-42AB-9CBE-0E5B16602957}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

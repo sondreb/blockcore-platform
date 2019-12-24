@@ -8,23 +8,25 @@ namespace Blockcore.Platform.Networking
 {
     public class GatewayManager
     {
-        private int port;
+        private ushort port { get { return options.Gateway.Port; } }
         private IPEndPoint tcpEndpoint;
         private TcpListener tcp;
         public IPEndPoint udpEndpoint;
         private UdpClient udp;
         private readonly ILogger<GatewayManager> log;
         private readonly MessageSerializer messageSerializer;
+        private readonly AppSettings options;
 
         public ConnectionManager Connections { get; }
 
         public GatewayManager(
             ILogger<GatewayManager> log,
+            AppSettings options,
             MessageSerializer messageSerializer,
             ConnectionManager connectionManager)
         {
-            this.port = 6610; // Currently not used in the port list: https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
             this.log = log;
+            this.options = options;
             this.messageSerializer = messageSerializer;
             this.Connections = connectionManager;
 

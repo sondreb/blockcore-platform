@@ -8,12 +8,12 @@ namespace Blockcore.Gateway
 {
     public class GatewayWorker : BackgroundService
     {
-        private readonly ILogger<GatewayWorker> _logger;
+        private readonly ILogger<GatewayWorker> log;
         private readonly GatewayHost host;
 
-        public GatewayWorker(ILogger<GatewayWorker> logger, GatewayHost host)
+        public GatewayWorker(ILogger<GatewayWorker> log, GatewayHost host)
         {
-            _logger = logger;
+            this.log = log;
             this.host = host;
         }
 
@@ -23,7 +23,7 @@ namespace Blockcore.Gateway
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                // _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                log.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 await Task.Delay(1000, stoppingToken);
             }
 

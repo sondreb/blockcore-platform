@@ -2,12 +2,17 @@
 using Blockcore.Platform.Networking;
 using Blockcore.Platform.Networking.Actions;
 using Blockcore.Platform.Networking.Events;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Diagnostics;
+using System.IO;
 
 namespace Blockcore.Hub
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
@@ -26,7 +31,19 @@ namespace Blockcore.Hub
             services.AddSingleton<MessageSerializer>();
             services.AddSingleton<MessageMaps>();
             services.AddSingleton<ConnectionManager>();
-            services.AddLogging();
+
+            var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
+            builder.AddJsonFileFromArgument(args);
+
+            var configuration = builder.Build();
+
+            AppSettings.Register(services, configuration);
+
+            services.AddLogging(builder =>
+            {
+                builder.AddConfiguration(configuration.GetSection("Logging"));
+                builder.AddFile(o => o.RootPath = AppContext.BaseDirectory);
+            });
 
             var assembly = typeof(IMessageHandler).Assembly;
 

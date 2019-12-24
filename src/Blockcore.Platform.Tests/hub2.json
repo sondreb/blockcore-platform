@@ -1,0 +1,12 @@
+{
+  "Hub": {
+    "Hubs": [ "127.0.0.1" ]
+  },
+  "Logging": {
+    "File": {
+      "Files": [
+        { "Path": "hub2-debug.log" }
+      ]
+    }
+  }
+}

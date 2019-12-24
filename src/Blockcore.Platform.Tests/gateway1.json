@@ -1,0 +1,9 @@
+{
+  "Logging": {
+    "File": {
+      "Files": [
+        { "Path": "gateway1-debug.log" }
+      ]
+    }
+  }
+}

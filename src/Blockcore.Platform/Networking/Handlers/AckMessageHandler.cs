@@ -22,7 +22,7 @@ namespace Blockcore.Platform.Networking.Handlers
             this.manager = manager;
         }
 
-        public void Process(BaseMessage message, ProtocolType Protocol, IPEndPoint EP = null, TcpClient Client = null)
+        public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, TcpClient client = null)
         {
             AckMessage msg = (AckMessage)message;
 
@@ -34,11 +34,11 @@ namespace Blockcore.Platform.Networking.Handlers
             {
                 var CI = manager.Connections.GetConnection(msg.Id);
 
-                if (CI.ExternalEndpoint.Address.Equals(EP.Address) & CI.ExternalEndpoint.Port != EP.Port)
+                if (CI.ExternalEndpoint.Address.Equals(endpoint.Address) & CI.ExternalEndpoint.Port != endpoint.Port)
                 {
-                    this.log.LogInformation("Received Ack on Different Port (" + EP.Port + "). Updating ...");
+                    this.log.LogInformation("Received Ack on Different Port (" + endpoint.Port + "). Updating ...");
 
-                    CI.ExternalEndpoint.Port = EP.Port;
+                    CI.ExternalEndpoint.Port = endpoint.Port;
 
                     hub.Publish(new ConnectionUpdatedEvent() { Data = (HubInfoMessage)CI.ToMessage() });
                 }
@@ -46,16 +46,16 @@ namespace Blockcore.Platform.Networking.Handlers
                 List<string> IPs = new List<string>();
                 CI.InternalAddresses.ForEach(new Action<IPAddress>(delegate (IPAddress IP) { IPs.Add(IP.ToString()); }));
 
-                if (!CI.ExternalEndpoint.Address.Equals(EP.Address) & !IPs.Contains(EP.Address.ToString()))
+                if (!CI.ExternalEndpoint.Address.Equals(endpoint.Address) & !IPs.Contains(endpoint.Address.ToString()))
                 {
-                    this.log.LogInformation("Received Ack on New Address (" + EP.Address + "). Updating ...");
+                    this.log.LogInformation("Received Ack on New Address (" + endpoint.Address + "). Updating ...");
 
-                    CI.InternalAddresses.Add(EP.Address);
+                    CI.InternalAddresses.Add(endpoint.Address);
                 }
 
                 msg.Response = true;
                 msg.RecipientId = manager.LocalHubInfo.Id;
-                manager.SendMessageUDP(new Ack(msg), EP);
+                manager.SendMessageUDP(new Ack(msg), endpoint);
             }
         }
     }
