@@ -2,6 +2,7 @@
 using Blockcore.Platform.Networking;
 using Blockcore.Platform.Networking.Actions;
 using Blockcore.Platform.Networking.Events;
+using Blockcore.Runtime;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,16 +26,24 @@ namespace Blockcore.Hub
             services.AddHostedService<HubWorker>();
             services.AddHostedService<HubUIWorker>();
 
-            services.AddSingleton<HubHost>();
+            services.AddTransient<HubHost>();
             services.AddSingleton<IMessageProcessingBase, MessageProcessing>();
-            services.AddSingleton<HubManager>();
+            services.AddSingleton<IHubManager, HubManager>();
             services.AddSingleton<MessageSerializer>();
             services.AddSingleton<MessageMaps>();
             services.AddSingleton<ConnectionManager>();
+            services.AddSingleton<PubSub.Hub>();
+
+            // Register the DataProtection service, used to protect the auto-generated recovery phrase.
+            Protection.AddProtection(services);
 
             var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
-            builder.AddJsonFileFromArgument(args);
 
+            if (args != null)
+            {
+                builder.AddJsonFileFromArgument(args);
+            }
+            
             var configuration = builder.Build();
 
             AppSettings.Register(services, configuration);

@@ -58,7 +58,7 @@ namespace Blockcore.Platform.Networking
         /// <param name="protocol"></param>
         /// <param name="endpoint"></param>
         /// <param name="client"></param>
-        public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, TcpClient client = null)
+        public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, NetworkClient client = null)
         {
             if (message == null)
             {

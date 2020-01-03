@@ -7,10 +7,10 @@
 
   <ItemGroup>
     <None Remove="appsettings.json" />
-    <None Remove="gateway1.json" />
-    <None Remove="gateway2.json" />
     <None Remove="hub1.json" />
     <None Remove="hub2.json" />
+    <None Remove="orchestrator1.json" />
+    <None Remove="orchestrator2.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,11 +18,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="gateway2.json">
+    <Content Include="orchestrator2.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="gateway1.json">
+    <Content Include="orchestrator1.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
@@ -51,9 +51,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Blockcore.Gateway\Blockcore.Gateway.csproj" />
     <ProjectReference Include="..\Blockcore.Hub\Blockcore.Hub.csproj" />
+    <ProjectReference Include="..\Blockcore.Orchestrator\Blockcore.Orchestrator.csproj" />
     <ProjectReference Include="..\Blockcore.Platform\Blockcore.Platform.csproj" />
+    <ProjectReference Include="..\Blockcore.Runtime\Blockcore.Runtime.csproj" />
   </ItemGroup>
 
 </Project>

@@ -23,7 +23,7 @@ namespace Blockcore.Platform.Networking.Entities
         public List<IPAddress> InternalAddresses = new List<IPAddress>();
 
         [NonSerialized] //server use only
-        public TcpClient Client;
+        public NetworkClient Client;
 
         [NonSerialized] //server use only
         public bool Initialized;

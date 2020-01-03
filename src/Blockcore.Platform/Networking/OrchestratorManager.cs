@@ -1,4 +1,5 @@
 ﻿using Blockcore.Platform.Networking.Entities;
+using Blockcore.Platform.Networking.Messages;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Net;
@@ -6,21 +7,23 @@ using System.Net.Sockets;
 
 namespace Blockcore.Platform.Networking
 {
-    public class GatewayManager
+    public class OrchestratorManager : IOrchestratorManager
     {
-        private ushort port { get { return options.Gateway.Port; } }
+        private ushort port { get { return options.Orchestrator.Port; } }
         private IPEndPoint tcpEndpoint;
         private TcpListener tcp;
-        public IPEndPoint udpEndpoint;
+        public IPEndPoint UdpEndpoint { get; set; }
         private UdpClient udp;
-        private readonly ILogger<GatewayManager> log;
+        private readonly ILogger<OrchestratorManager> log;
         private readonly MessageSerializer messageSerializer;
         private readonly AppSettings options;
 
         public ConnectionManager Connections { get; }
 
-        public GatewayManager(
-            ILogger<GatewayManager> log,
+        public IMessageProcessingBase MessageProcessing { get; set; }
+
+        public OrchestratorManager(
+            ILogger<OrchestratorManager> log,
             AppSettings options,
             MessageSerializer messageSerializer,
             ConnectionManager connectionManager)
@@ -33,40 +36,42 @@ namespace Blockcore.Platform.Networking
             tcpEndpoint = new IPEndPoint(IPAddress.Any, port);
             tcp = new TcpListener(tcpEndpoint);
 
-            udpEndpoint = new IPEndPoint(IPAddress.Any, port);
-            udp = new UdpClient(udpEndpoint);
+            UdpEndpoint = new IPEndPoint(IPAddress.Any, port);
+            udp = new UdpClient(UdpEndpoint);
         }
 
-        public void SendTCP(IBaseEntity entity, TcpClient client)
+        public void SendTCP(IBaseEntity entity, NetworkClient client)
         {
-            if (client != null && client.Connected)
+            if (client.TcpClient != null && client.TcpClient.Connected)
             {
                 byte[] Data = messageSerializer.Serialize(entity.ToMessage());
 
-                NetworkStream NetStream = client.GetStream();
+                NetworkStream NetStream = client.TcpClient.GetStream();
                 NetStream.Write(Data, 0, Data.Length);
             }
         }
 
-        public void SendUDP(IBaseEntity Item, IPEndPoint EP)
+        public void SendUDP(IBaseEntity entity, IPEndPoint endpoint)
         {
-            byte[] Bytes = messageSerializer.Serialize(Item.ToMessage());
+            byte[] Bytes = messageSerializer.Serialize(entity.ToMessage());
 
-            udp.Send(Bytes, Bytes.Length, udpEndpoint);
+            udp.Send(Bytes, Bytes.Length, UdpEndpoint);
         }
 
-        public void BroadcastTCP(IBaseEntity Item)
+        public void BroadcastTCP(IBaseEntity entity)
         {
-            foreach (HubInfo CI in Connections.Connections.Where(x => x.Client != null))
+            foreach (HubInfo hubInfo in Connections.Connections.Where(x => x.Client != null))
             { 
-                SendTCP(Item, CI.Client);
+                SendTCP(entity, hubInfo.Client);
             }
         }
 
-        public void BroadcastUDP(IBaseEntity Item)
+        public void BroadcastUDP(IBaseEntity entity)
         {
-            foreach (HubInfo CI in Connections.Connections)
-                SendUDP(Item, CI.ExternalEndpoint);
+            foreach (HubInfo hubInfo in Connections.Connections)
+            { 
+                SendUDP(entity, hubInfo.ExternalEndpoint);
+            }
         }
 
         public TcpListener Tcp { get { return tcp; } }
@@ -87,9 +92,14 @@ namespace Blockcore.Platform.Networking
 
         }
 
+        public void ProcessMessage(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, NetworkClient client = null)
+        {
+            this.MessageProcessing.Process(message, protocol, endpoint, client);
+        }
+
         public void Disconnect(TcpClient Client)
         {
-            HubInfo CI = Connections.Connections.FirstOrDefault(x => x.Client == Client);
+            HubInfo CI = Connections.Connections.FirstOrDefault(x => x.Client?.TcpClient == Client);
 
             if (CI != null)
             {

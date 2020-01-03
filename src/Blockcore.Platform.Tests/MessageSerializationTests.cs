@@ -122,7 +122,7 @@ namespace Blockcore.Platform.Tests
                     From = "USER1",
                     To = "USER2",
                     Id = "id" + i,
-                    RecipientId = i,
+                    RecipientId = i.ToString(),
                     Content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut dolor varius, aliquam lectus nec, rutrum dolor. Vestibulum faucibus eleifend ante, quis aliquet lacus rhoncus in. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed nec sapien condimentum mi tempor porta hendrerit at metus. Nam eu blandit odio. Sed consectetur et justo non condimentum. Quisque in ullamcorper sapien. Fusce eget augue ut ligula gravida porttitor. In iaculis cursus nulla quis ornare."
                 };
 

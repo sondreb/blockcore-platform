@@ -8,15 +8,16 @@ namespace Blockcore.Platform.Networking.Handlers
 {
     public class NotificationMessageHandler : IMessageHandler, IHandle<NotificationMessage>
     {
-        private readonly Hub hub = Hub.Default;
-        private readonly HubManager manager;
+        private readonly Hub events;
+        private readonly IHubManager manager;
 
-        public NotificationMessageHandler(HubManager manager)
+        public NotificationMessageHandler(PubSub.Hub events, IHubManager manager)
         {
+            this.events = events;
             this.manager = manager;
         }
 
-        public void Process(BaseMessage message, ProtocolType Protocol, IPEndPoint EP = null, TcpClient Client = null)
+        public void Process(BaseMessage message, ProtocolType Protocol, IPEndPoint endpoint = null, NetworkClient client = null)
         {
             NotificationMessage item = (NotificationMessage)message;
 
@@ -27,13 +28,13 @@ namespace Blockcore.Platform.Networking.Handlers
                 if (hubInfo != null)
                 {
                     manager.Connections.RemoveConnection(hubInfo);
-                    hub.Publish(new ConnectionRemovedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage() });
+                    events.Publish(new ConnectionRemovedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage() });
                 }
             }
             else if (item.Type == NotificationsTypes.ServerShutdown)
             {
                 manager.DisconnectGateway();
-                hub.Publish(new GatewayShutdownEvent());
+                events.Publish(new GatewayShutdownEvent());
             }
         }
     }

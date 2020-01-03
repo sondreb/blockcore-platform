@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Blockcore.Platform
 {
-    public class GatewayOptions
+    public class OrchestratorOptions
     {
         public ushort Port { get; set; } = 6610; // Currently not used in the port list: https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
     }

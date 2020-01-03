@@ -9,15 +9,16 @@ namespace Blockcore.Platform.Networking.Handlers
 {
     public class MessageMessageHandler : IMessageHandler, IHandle<MessageMessage>
     {
-        private readonly Hub hub = Hub.Default;
-        private readonly HubManager connectionManager;
+        private readonly Hub events;
+        private readonly IHubManager connectionManager;
 
-        public MessageMessageHandler(HubManager connectionManager)
+        public MessageMessageHandler(PubSub.Hub events, IHubManager connectionManager)
         {
+            this.events = events;
             this.connectionManager = connectionManager;
         }
 
-        public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, TcpClient client = null)
+        public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, NetworkClient client = null)
         {
             MessageMessage msg = (MessageMessage)message;
 
@@ -28,12 +29,12 @@ namespace Blockcore.Platform.Networking.Handlers
             // TODO: Debug and figure out what to do here.
             if (string.IsNullOrWhiteSpace(msg.Id))
             {
-                hub.Publish(new MessageReceivedEvent() { Data = new Message(msg) });
+                events.Publish(new MessageReceivedEvent() { Data = new Message(msg) });
                 //OnResultsUpdate.Invoke(this, msg.From + ": " + msg.Content);
             }
             else if (endpoint != null & client != null)
             {
-                hub.Publish(new MessageReceivedEvent() { Data = new Message(msg) });
+                events.Publish(new MessageReceivedEvent() { Data = new Message(msg) });
                 //OnMessageReceived.Invoke(EP, new MessageReceivedEventArgs(CI, new Message(m), EP));
             }
         }

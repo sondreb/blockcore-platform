@@ -4,14 +4,14 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Blockcore.Gateway
+namespace Blockcore.Orchestrator
 {
-    public class GatewayWorker : BackgroundService
+    public class OrchestratorWorker : BackgroundService
     {
-        private readonly ILogger<GatewayWorker> log;
-        private readonly GatewayHost host;
+        private readonly ILogger<OrchestratorWorker> log;
+        private readonly OrchestratorHost host;
 
-        public GatewayWorker(ILogger<GatewayWorker> log, GatewayHost host)
+        public OrchestratorWorker(ILogger<OrchestratorWorker> log, OrchestratorHost host)
         {
             this.log = log;
             this.host = host;

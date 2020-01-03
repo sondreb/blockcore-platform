@@ -6,6 +6,6 @@ namespace Blockcore.Platform.Networking
 {
     public interface IHandle<T> where T : BaseMessage
     {
-        void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, TcpClient client = null);
+        void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, NetworkClient client = null);
     }
 }

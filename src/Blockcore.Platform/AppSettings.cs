@@ -9,17 +9,17 @@ namespace Blockcore.Platform
 {
     public class AppSettings
     {
-        public GatewayOptions Gateway { get; private set; }
+        public OrchestratorOptions Orchestrator { get; private set; }
 
         public HubOptions Hub { get; private set; }
 
-        public AppSettings(IOptionsMonitor<GatewayOptions> gateway, IOptionsMonitor<HubOptions> hub)
+        public AppSettings(IOptionsMonitor<OrchestratorOptions> orchestrator, IOptionsMonitor<HubOptions> hub)
         {
-            Gateway = gateway.CurrentValue;
+            Orchestrator = orchestrator.CurrentValue;
             Hub = hub.CurrentValue;
 
-            gateway.OnChange((options) => {
-                Gateway = options;
+            orchestrator.OnChange((options) => {
+                Orchestrator = options;
             });
 
             hub.OnChange((options) => {
@@ -29,9 +29,9 @@ namespace Blockcore.Platform
 
         public static void Register(IServiceCollection services, IConfigurationRoot configuration) {
 
-            services.Configure<GatewayOptions>(configuration.GetSection("Gateway"));
+            services.Configure<OrchestratorOptions>(configuration.GetSection("Orchestrator"));
             services.Configure<HubOptions>(configuration.GetSection("Hub"));
-            services.AddScoped((sp) => new AppSettings(sp.GetService<IOptionsMonitor<GatewayOptions>>(), sp.GetService<IOptionsMonitor<HubOptions>>()));
+            services.AddScoped((sp) => new AppSettings(sp.GetService<IOptionsMonitor<OrchestratorOptions>>(), sp.GetService<IOptionsMonitor<HubOptions>>()));
         }
     }
 }

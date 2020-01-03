@@ -12,18 +12,20 @@ namespace Blockcore.Platform.Networking.Handlers
 {
     public class AckMessageHandler : IMessageHandler, IHandle<AckMessage>
     {
-        private readonly Hub hub = Hub.Default;
+        private readonly Hub events;
         private readonly ILogger<AckMessageHandler> log;
-        private readonly HubManager manager;
+        private readonly IHubManager manager;
 
-        public AckMessageHandler(ILogger<AckMessageHandler> log, HubManager manager)
+        public AckMessageHandler(ILogger<AckMessageHandler> log, PubSub.Hub events, IHubManager manager)
         {
             this.log = log;
+            this.events = events;
             this.manager = manager;
         }
 
-        public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, TcpClient client = null)
+        public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, NetworkClient networkClient = null)
         {
+            var client = networkClient?.TcpClient;
             AckMessage msg = (AckMessage)message;
 
             if (msg.Response)
@@ -40,7 +42,7 @@ namespace Blockcore.Platform.Networking.Handlers
 
                     CI.ExternalEndpoint.Port = endpoint.Port;
 
-                    hub.Publish(new ConnectionUpdatedEvent() { Data = (HubInfoMessage)CI.ToMessage() });
+                    events.Publish(new ConnectionUpdatedEvent() { Data = (HubInfoMessage)CI.ToMessage() });
                 }
 
                 List<string> IPs = new List<string>();
@@ -55,7 +57,7 @@ namespace Blockcore.Platform.Networking.Handlers
 
                 msg.Response = true;
                 msg.RecipientId = manager.LocalHubInfo.Id;
-                manager.SendMessageUDP(new Ack(msg), endpoint);
+                manager.SendMessageToHubUDP(new Ack(msg), endpoint);
             }
         }
     }

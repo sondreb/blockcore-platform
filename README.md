@@ -8,14 +8,14 @@ The Blockcore Platform can be used to build distributed apps and systems, that s
 
 ### Blockcore.Runtime
 
-This is a shared library for Blockcore.Gateway and Blockcore.Hub, used to share code that relies on runtime assemblies that 
+This is a shared library for Blockcore.Orchestrator and Blockcore.Hub, used to share code that relies on runtime assemblies that 
 should not be referenced in the Blockcore.Platform library.
 
 ### Blockcore.Platform
 
 Main shared library, should avoid too many dependencies.
 
-### Blockcore.Gateway
+### Blockcore.Orchestrator
 
 Main app for Gateway hosting.
 

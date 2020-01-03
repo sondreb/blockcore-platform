@@ -17,18 +17,19 @@ namespace Blockcore.Platform.Networking.Messages
         public string Content { get; set; }
 
         [Key(4)]
-        public long RecipientId { get; set; }
+        public string RecipientId { get; set; }
 
         public MessageMessage()
         {
 
         }
 
-        public MessageMessage(string from, string to, string content)
+        public MessageMessage(string from, string to, string content, string recipientId)
         {
             From = from;
             To = to;
             Content = content;
+            RecipientId = recipientId;
         }
     }
 }

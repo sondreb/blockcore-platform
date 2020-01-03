@@ -9,7 +9,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace Blockcore.Gateway
+namespace Blockcore.Orchestrator
 {
     public class Program
     {
@@ -21,18 +21,23 @@ namespace Blockcore.Gateway
         public static IHostBuilder CreateHostBuilder(string[] args) => Host.CreateDefaultBuilder(args)
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddHostedService<GatewayWorker>();
+                services.AddHostedService<OrchestratorWorker>();
 
-                services.AddSingleton<GatewayHost>();
+                services.AddSingleton<OrchestratorHost>();
                 services.AddSingleton<IMessageProcessingBase, MessageProcessing>();
-                services.AddSingleton<GatewayManager>();
+                services.AddSingleton<IOrchestratorManager, OrchestratorManager>();
                 services.AddSingleton<MessageSerializer>();
                 services.AddSingleton<MessageMaps>();
                 services.AddSingleton<ConnectionManager>();
+                services.AddSingleton<PubSub.Hub>();
 
                 var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
-                builder.AddJsonFileFromArgument(args);
-                
+
+                if (args != null)
+                {
+                    builder.AddJsonFileFromArgument(args);
+                }
+
                 var configuration = builder.Build();
 
                 AppSettings.Register(services, configuration);
@@ -46,7 +51,7 @@ namespace Blockcore.Gateway
 
                 // TODO: This should likely be updated in the future to allow third-party plugin assemblies to be loaded as well.
                 // Register all handlers in executing assembly.
-                typeof(IMessageGatewayHandler).Assembly.GetTypesImplementing<IMessageGatewayHandler>().ForEach((t) =>
+                typeof(IMessageOrchestratorHandler).Assembly.GetTypesImplementing<IMessageOrchestratorHandler>().ForEach((t) =>
                 {
                     services.AddSingleton(typeof(IMessageHandler), t);
                 });

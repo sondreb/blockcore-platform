@@ -5,17 +5,17 @@ using System.Net.Sockets;
 
 namespace Blockcore.Platform.Networking.Handlers
 {
-    public class ReqMessageGatewayHandler : IMessageGatewayHandler, IHandle<ReqMessage>
+    public class ReqMessageGatewayHandler : IMessageOrchestratorHandler, IHandle<ReqMessage>
     {
         
-        private readonly GatewayManager manager;
+        private readonly IOrchestratorManager manager;
 
-        public ReqMessageGatewayHandler(GatewayManager manager)
+        public ReqMessageGatewayHandler(IOrchestratorManager manager)
         {
             this.manager = manager;
         }
 
-        public void Process(BaseMessage message, ProtocolType Protocol, IPEndPoint EP = null, TcpClient Client = null)
+        public void Process(BaseMessage message, ProtocolType Protocol, IPEndPoint endpoint = null, NetworkClient client = null)
         {
             ReqMessage req = (ReqMessage)message;
 

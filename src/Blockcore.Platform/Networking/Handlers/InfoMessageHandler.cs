@@ -9,15 +9,16 @@ namespace Blockcore.Platform.Networking.Handlers
 {
     public class InfoMessageHandler : IMessageHandler, IHandle<HubInfoMessage>
     {
-        private Hub hub = Hub.Default;
-        private readonly HubManager manager;
+        private Hub events;
+        private readonly IHubManager manager;
 
-        public InfoMessageHandler(HubManager manager)
+        public InfoMessageHandler(PubSub.Hub events, IHubManager manager)
         {
+            this.events = events;
             this.manager = manager;
         }
 
-        public void Process(BaseMessage message, ProtocolType Protocol, IPEndPoint EP = null, TcpClient Client = null)
+        public void Process(BaseMessage message, ProtocolType Protocol, IPEndPoint endpoint = null, NetworkClient client = null)
         {
             var msg = (HubInfoMessage)message;
 
@@ -31,13 +32,13 @@ namespace Blockcore.Platform.Networking.Handlers
                     hubInfo = new HubInfo(msg);
                     manager.Connections.AddConnection(hubInfo);
 
-                    hub.Publish(new ConnectionAddedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage() });
+                    events.Publish(new HubRegisteredEvent() { Data = (HubInfoMessage)hubInfo.ToMessage() });
                 }
                 else
                 {
                     hubInfo.Update(msg);
 
-                    hub.Publish(new ConnectionUpdatedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage() });
+                    events.Publish(new HubUpdatedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage() });
                 }
             }
         }

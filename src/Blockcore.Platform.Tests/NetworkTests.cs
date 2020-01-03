@@ -19,8 +19,8 @@ namespace Blockcore.Platform.Tests
         {
             _ = Task.Run(async () =>
             {
-                var args = new string[] { "config=gateway1.json" };
-                Gateway.Program.CreateHostBuilder(args).Build().Run();
+                var args = new string[] { "config=orchestrator1.json" };
+                Orchestrator.Program.CreateHostBuilder(args).Build().Run();
             });
 
             _ = Task.Run(async () =>

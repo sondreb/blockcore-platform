@@ -20,17 +20,18 @@ namespace Blockcore.Hub
     public class HubUIWorker : BackgroundService
     {
         private readonly ILogger<HubUIWorker> log;
-        private readonly HubManager manager;
-        private readonly PubSub.Hub hub = PubSub.Hub.Default;
+        private readonly IHubManager manager;
+        private readonly PubSub.Hub hub;
         private readonly IEnumerable<IEvent> events;
         private readonly IEnumerable<IAction> actions;
         private WebWindow window;
         private Dictionary<string, Type> actionMap;
         private MethodInfo publishMethod;
 
-        public HubUIWorker(ILogger<HubUIWorker> log, HubManager manager, IEnumerable<IEvent> events, IEnumerable<IAction> actions)
+        public HubUIWorker(ILogger<HubUIWorker> log, PubSub.Hub hub, IHubManager manager, IEnumerable<IEvent> events, IEnumerable<IAction> actions)
         {
             this.log = log;
+            this.hub = hub;
             this.manager = manager;
             this.events = events;
             this.actions = actions;

@@ -7,19 +7,20 @@ using System.Net.Sockets;
 
 namespace Blockcore.Platform.Networking.Handlers
 {
-    public class InfoMessageGatewayHandler : IMessageGatewayHandler, IHandle<HubInfoMessage>
+    public class InfoMessageGatewayHandler : IMessageOrchestratorHandler, IHandle<HubInfoMessage>
     {
         private readonly ILogger<InfoMessageGatewayHandler> log;
-        private readonly GatewayManager manager;
+        private readonly IOrchestratorManager manager;
 
-        public InfoMessageGatewayHandler(ILogger<InfoMessageGatewayHandler> log, GatewayManager manager)
+        public InfoMessageGatewayHandler(ILogger<InfoMessageGatewayHandler> log, IOrchestratorManager manager)
         {
             this.log = log;
             this.manager = manager;
         }
 
-        public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, TcpClient client = null)
+        public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, NetworkClient networkClient = null)
         {
+            var client = networkClient?.TcpClient;
             HubInfo hubInfo = manager.Connections.GetConnection(message.Id);
 
             if (hubInfo == null)
@@ -28,35 +29,74 @@ namespace Blockcore.Platform.Networking.Handlers
                 manager.Connections.AddConnection(hubInfo);
 
                 if (endpoint != null)
+                {
                     this.log.LogInformation("Client Added: UDP EP: {0}:{1}, Name: {2}", endpoint.Address, endpoint.Port, hubInfo.Name);
+                }
                 else if (client != null)
-                    Console.WriteLine("Client Added: TCP EP: {0}:{1}, Name: {2}", ((IPEndPoint)client.Client.RemoteEndPoint).Address, ((IPEndPoint)client.Client.RemoteEndPoint).Port, hubInfo.Name);
+                {
+                    if (client.Client.RemoteEndPoint != null)
+                    {
+                        this.log.LogInformation("Client Added: TCP EP: {0}:{1}, Name: {2}", ((IPEndPoint)client.Client.RemoteEndPoint).Address, ((IPEndPoint)client.Client.RemoteEndPoint).Port, hubInfo.Name);
+                    }
+                    else
+                    {
+                        this.log.LogInformation("Client Added: TCP EP:, Name: {0}", hubInfo.Name);
+                    }
+                }
             }
             else
             {
                 hubInfo.Update((HubInfoMessage)message);
 
                 if (endpoint != null)
+                { 
                     this.log.LogInformation("Client Updated: UDP EP: {0}:{1}, Name: {2}", endpoint.Address, endpoint.Port, hubInfo.Name);
+                }
                 else if (client != null)
-                    this.log.LogInformation("Client Updated: TCP EP: {0}:{1}, Name: {2}", ((IPEndPoint)client.Client.RemoteEndPoint).Address, ((IPEndPoint)client.Client.RemoteEndPoint).Port, hubInfo.Name);
+                {
+                    if (client.Client.RemoteEndPoint != null)
+                    {
+                        this.log.LogInformation("Client Updated: TCP EP: {0}:{1}, Name: {2}", ((IPEndPoint)client.Client.RemoteEndPoint).Address, ((IPEndPoint)client.Client.RemoteEndPoint).Port, hubInfo.Name);
+                    }
+                    else
+                    {
+                        this.log.LogInformation("Client Updated: TCP EP:, Name: {0}", hubInfo.Name);
+                    }
+                }
             }
 
             if (endpoint != null)
+            { 
                 hubInfo.ExternalEndpoint = endpoint;
+            }
 
-            if (client != null)
-                hubInfo.Client = client;
+            if (networkClient != null)
+            { 
+                hubInfo.Client = networkClient;
+            }
+
+            // If we have an instance of the TcpClient, make sure we update the hubInfo with it.
+            //if (networkClient != null)
+            //{
+            //    if (hubInfo.Client == null)
+            //    {
+            //        hubInfo.Client = new NetworkClient(client);
+            //    }
+            //    else
+            //    {
+            //        hubInfo.Client.TcpClient = client;
+            //    }
+            //}
 
             manager.BroadcastTCP(hubInfo);
 
             if (!hubInfo.Initialized)
             {
                 if (hubInfo.ExternalEndpoint != null & protocol == ProtocolType.Udp)
-                    manager.SendUDP(new Message("Server", hubInfo.Name, "UDP Communication Test"), hubInfo.ExternalEndpoint);
+                    manager.SendUDP(new Message("Server", hubInfo.Name, "UDP Communication Test", string.Empty), hubInfo.ExternalEndpoint);
 
                 if (hubInfo.Client != null & protocol == ProtocolType.Tcp)
-                    manager.SendTCP(new Message("Server", hubInfo.Name, "TCP Communication Test"), hubInfo.Client);
+                    manager.SendTCP(new Message("Server", hubInfo.Name, "TCP Communication Test", string.Empty), hubInfo.Client);
 
                 if (hubInfo.Client != null & hubInfo.ExternalEndpoint != null)
                 {

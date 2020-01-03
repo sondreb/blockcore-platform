@@ -11,5 +11,7 @@ namespace Blockcore.Platform
         public string AddNode { get; set; }
 
         public List<string> Hubs { get; set; }
+
+        public string DataFolder { get; set; }
     }
 }

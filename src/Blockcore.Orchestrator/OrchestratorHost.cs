@@ -4,38 +4,47 @@ using Blockcore.Platform.Networking.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Blockcore.Gateway
+namespace Blockcore.Orchestrator
 {
-    public class GatewayHost
+    public class OrchestratorHost
     {
-        private readonly ILogger<GatewayHost> log;
+        private readonly ILogger<OrchestratorHost> log;
         private readonly IMessageProcessingBase messageProcessing;
         private readonly MessageSerializer messageSerializer;
-        private readonly GatewayManager connectionManager;
+        private readonly IOrchestratorManager manager;
         private readonly AppSettings options;
 
-        public GatewayHost(
-            ILogger<GatewayHost> log,
+        public OrchestratorHost(
+            ILogger<OrchestratorHost> log,
             AppSettings options,
             IMessageProcessingBase messageProcessing,
             MessageSerializer messageSerializer,
-            GatewayManager connectionManager)
+            IOrchestratorManager connectionManager)
         {
             this.log = log;
             this.options = options;
             this.messageProcessing = messageProcessing;
             this.messageSerializer = messageSerializer;
-            this.connectionManager = connectionManager;
+            this.manager = connectionManager;
+
+            // Due to circular dependency, we must manually set the MessageProcessing on the Manager.
+            this.manager.MessageProcessing = this.messageProcessing;
+        }
+
+        public void Setup()
+        {
+            // Prepare the messaging processors for message handling.
+            this.messageProcessing.Build();
         }
 
         public void Launch(CancellationToken token)
         {
-            // Prepare the messaging processors for message handling.
-            this.messageProcessing.Build();
+            Setup();
 
             Task tcpTask = Task.Run(() => {
                 TcpWorker(token);
@@ -49,18 +58,18 @@ namespace Blockcore.Gateway
         public void Stop()
         {
             // We will broadcast a shutdown when we're stopping.
-            connectionManager.BroadcastTCP(new Notification(NotificationsTypes.ServerShutdown, null));
+            manager.BroadcastTCP(new Notification(NotificationsTypes.ServerShutdown, null));
         }
 
         private void TcpWorker(CancellationToken token)
         {
-            connectionManager.StartTcp();
+            manager.StartTcp();
 
             while (!token.IsCancellationRequested)
             {
                 try
                 {
-                    TcpClient newClient = connectionManager.Tcp.AcceptTcpClient();
+                    TcpClient newClient = manager.Tcp.AcceptTcpClient();
 
                     Action<object> processData = new Action<object>(delegate (object tcp)
                     {
@@ -73,17 +82,17 @@ namespace Blockcore.Gateway
                             {
                                 // Retrieve the message from the network stream. This will handle everything from message headers, body and type parsing.
                                 var message = messageSerializer.Deserialize(client.GetStream());
-                                
-                                messageProcessing.Process(message, ProtocolType.Tcp, null, client);
+                                this.manager.ProcessMessage(message, ProtocolType.Tcp, null, new NetworkClient(client));
+                                //messageProcessing.Process(message, ProtocolType.Tcp, null, client);
                             }
                             catch (Exception ex)
                             {
                                 this.log.LogError(ex, "Failed to process incoming message.");
-                                connectionManager.Disconnect(client);
+                                manager.Disconnect(client);
                             }
                         }
 
-                        connectionManager.Disconnect(client);
+                        manager.Disconnect(client);
                     });
 
                     Thread threadProcessData = new Thread(new ParameterizedThreadStart(processData));
@@ -101,19 +110,24 @@ namespace Blockcore.Gateway
 
         private void UdpWorker(CancellationToken token)
         {
-            log.LogInformation($"UDP listener started on port {connectionManager.udpEndpoint.Port}.");
+            log.LogInformation($"UDP listener started on port {manager.UdpEndpoint.Port}.");
 
             while (!token.IsCancellationRequested)
             {
                 try
                 {
-                    byte[] receivedBytes = connectionManager.Udp.Receive(ref connectionManager.udpEndpoint);
+                    //var endpoint = manager.UdpEndpoint;
+                    IPEndPoint endpoint = null;
+
+                    byte[] receivedBytes = manager.Udp.Receive(ref endpoint);
+
+                    manager.UdpEndpoint = endpoint;
 
                     if (receivedBytes != null)
                     {
                         // Retrieve the message from the network stream. This will handle everything from message headers, body and type parsing.
                         var message = messageSerializer.Deserialize(receivedBytes);
-                        messageProcessing.Process(message, ProtocolType.Udp, connectionManager.udpEndpoint);
+                        messageProcessing.Process(message, ProtocolType.Udp, manager.UdpEndpoint);
                     }
                 }
                 catch (Exception ex)

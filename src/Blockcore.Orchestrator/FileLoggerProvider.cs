@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Blockcore.Gateway
+namespace Blockcore.Orchestrator
 {
     [ProviderAlias("ErrorFile")]
     public class FileLoggerProvider : Karambolo.Extensions.Logging.File.FileLoggerProvider

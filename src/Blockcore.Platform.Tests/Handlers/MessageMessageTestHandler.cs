@@ -10,7 +10,7 @@ namespace Blockcore.Platform.Tests.Handlers
 {
     public class MessageMessageTestHandler : IMessageHandler, IHandle<MessageMessage>
     {
-        public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, TcpClient client = null)
+        public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, NetworkClient client = null)
         {
             
         }

@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace Blockcore.Platform.Networking
 {
-    public class HubManager
+    public class HubManager : IHubManager
     {
         public IPEndPoint ServerEndpoint { get; private set; }
 
@@ -53,7 +53,7 @@ namespace Blockcore.Platform.Networking
 
         private readonly ILogger<HubManager> log;
         private readonly MessageSerializer messageSerializer;
-        private readonly Hub hub = Hub.Default;
+        private readonly Hub events;
         private readonly AppSettings options;
 
         public ConnectionManager Connections { get; }
@@ -62,11 +62,13 @@ namespace Blockcore.Platform.Networking
 
         public HubManager(
             ILogger<HubManager> log,
+            PubSub.Hub events,
             AppSettings options,
             ConnectionManager connectionManager,
             MessageSerializer messageSerializer)
         {
             this.log = log;
+            this.events = events;
             this.options = options;
             this.messageSerializer = messageSerializer;
             this.Connections = connectionManager;
@@ -95,7 +97,7 @@ namespace Blockcore.Platform.Networking
         {
             try
             {
-                this.log.LogInformation("Connectiong to supplied server: " + server);
+                this.log.LogInformation("Connecting to supplied server: " + server);
 
                 this.ServerEndpoint = IPEndPoint.Parse(server);
 
@@ -109,25 +111,27 @@ namespace Blockcore.Platform.Networking
                 UDPListen = true;
                 TCPListen = true;
 
-                SendMessageUDP(LocalHubInfo.Simplified(), ServerEndpoint);
+                SendMessageToOrchestratorUDP(LocalHubInfo.Simplified());
                 LocalHubInfo.InternalEndpoint = (IPEndPoint)UDPClient.Client.LocalEndPoint;
 
                 Thread.Sleep(550);
-                SendMessageTCP(LocalHubInfo);
+                SendMessageToOrchestratorTCP(LocalHubInfo);
 
+                // Every 5 second we'll send a keep alive message to the orchestrator to ensure the connection is
+                // kept open and orchestrator knows we've not shut down.
                 Thread keepAlive = new Thread(new ThreadStart(delegate
                 {
                     while (TCPClient.Connected)
                     {
                         Thread.Sleep(5000);
-                        SendMessageTCP(new KeepAlive());
+                        SendMessageToOrchestratorTCP(new KeepAlive());
                     }
                 }));
 
                 keepAlive.IsBackground = true;
                 keepAlive.Start();
 
-                hub.Publish(new GatewayConnectedEvent() { Self = (HubInfoMessage)LocalHubInfo.ToMessage(), Name = "Gateway" });
+                events.Publish(new GatewayConnectedEvent() { Self = (HubInfoMessage)LocalHubInfo.ToMessage(), Name = "Gateway" });
 
             }
             catch (Exception ex)
@@ -147,7 +151,7 @@ namespace Blockcore.Platform.Networking
             }
 
             Connections.ClearConnections();
-            hub.Publish(new GatewayDisconnectedEvent());
+            events.Publish(new GatewayDisconnectedEvent());
         }
 
         private IPAddress GetAdapterWithInternetAccess()
@@ -176,7 +180,7 @@ namespace Blockcore.Platform.Networking
             return null;
         }
 
-        public void SendMessageTCP(IBaseEntity entity)
+        public void SendMessageToOrchestratorTCP(IBaseEntity entity)
         {
             if (TCPClient != null && TCPClient.Connected)
             {
@@ -194,7 +198,30 @@ namespace Blockcore.Platform.Networking
             }
         }
 
-        public void SendMessageUDP(IBaseEntity entity, IPEndPoint endpoint)
+        /// <inheritdoc />
+        public void SendMessageToOrchestratorUDP(IBaseEntity entity)
+        {
+            var endpoint = this.ServerEndpoint;
+
+            entity.Id = LocalHubInfo.Id;
+
+            byte[] data = messageSerializer.Serialize(entity.ToMessage());
+
+            try
+            {
+                if (data != null)
+                {
+                    UDPClient.Send(data, data.Length, endpoint);
+                }
+            }
+            catch (Exception ex)
+            {
+                this.log.LogError("Error on UDP send", ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public void SendMessageToHubUDP(IBaseEntity entity, IPEndPoint endpoint)
         {
             entity.Id = LocalHubInfo.Id;
 
@@ -287,7 +314,8 @@ namespace Blockcore.Platform.Networking
         {
             Req req = new Req(LocalHubInfo.Id, hubInfo.Id);
 
-            SendMessageTCP(req);
+            // Send a message to the orchestrator, telling the target hub that we would like to connect.
+            SendMessageToOrchestratorTCP(req);
 
             this.log.LogInformation("Sent Connection Request To: " + hubInfo.ToString());
 
@@ -299,7 +327,7 @@ namespace Blockcore.Platform.Networking
                 {
                     this.log.LogInformation("Connection Successfull to: " + responsiveEndpoint.ToString());
 
-                    hub.Publish(new ConnectionStartedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage(), Endpoint = responsiveEndpoint.ToString() });
+                    events.Publish(new HubConnectionStartedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage(), Endpoint = responsiveEndpoint.ToString() });
                 }
             }));
 
@@ -331,7 +359,7 @@ namespace Blockcore.Platform.Networking
 
                     this.log.LogInformation("Sending Ack to " + endpoint.ToString() + ". Attempt " + i + " of 3");
 
-                    SendMessageUDP(new Ack(LocalHubInfo.Id), endpoint);
+                    SendMessageToHubUDP(new Ack(LocalHubInfo.Id), endpoint);
                     Thread.Sleep(200);
 
                     Ack response = AckResponces.FirstOrDefault(a => a.RecipientId == hubInfo.Id);
@@ -362,7 +390,7 @@ namespace Blockcore.Platform.Networking
 
                     this.log.LogInformation("Sending Ack to " + hubInfo.ExternalEndpoint + ". Attempt " + i + " of 99");
 
-                    SendMessageUDP(new Ack(LocalHubInfo.Id), hubInfo.ExternalEndpoint);
+                    SendMessageToHubUDP(new Ack(LocalHubInfo.Id), hubInfo.ExternalEndpoint);
                     Thread.Sleep(300);
 
                     Ack response = AckResponces.FirstOrDefault(a => a.RecipientId == hubInfo.Id);

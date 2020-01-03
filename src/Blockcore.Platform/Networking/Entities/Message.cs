@@ -7,13 +7,14 @@ namespace Blockcore.Platform.Networking.Entities
         public string From { get; set; }
         public string To { get; set; }
         public string Content { get; set; }
-        public long RecipientId { get; set; }
+        public string RecipientId { get; set; }
 
-        public Message(string from, string to, string content)
+        public Message(string from, string to, string content, string recipientId)
         {
             From = from;
             To = to;
             Content = content;
+            RecipientId = recipientId;
         }
 
         public Message(MessageMessage message)
@@ -29,11 +30,11 @@ namespace Blockcore.Platform.Networking.Entities
         {
             var msg = new MessageMessage();
 
-            this.From = From;
-            this.To = To;
-            this.Content = Content;
-            this.Id = Id;
-            this.RecipientId = RecipientId;
+            msg.From = From;
+            msg.To = To;
+            msg.Content = Content;
+            msg.Id = Id;
+            msg.RecipientId = RecipientId;
 
             return msg;
         }

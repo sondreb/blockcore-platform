@@ -6,7 +6,7 @@ namespace Blockcore.Platform.Networking.Handlers
 {
     public class KeepAliveMessageHandler : IMessageHandler, IHandle<KeepAliveMessage>
     {
-        public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, TcpClient client = null)
+        public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, NetworkClient client = null)
         {
             KeepAliveMessage msg = (KeepAliveMessage)message;
         }
