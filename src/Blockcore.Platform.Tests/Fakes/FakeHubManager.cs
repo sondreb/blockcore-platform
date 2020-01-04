@@ -304,6 +304,10 @@ namespace Blockcore.Platform.Tests.Fakes
 
         public void SendMessageToOrchestratorTCP(IBaseEntity entity)
         {
+            // Simulate serialization.
+            byte[] data = messageSerializer.Serialize(entity.ToMessage());
+            var message = messageSerializer.Deserialize(data);
+
             // Send the message to the fake orchestrator.
             // TODO: We can't recreate the NetworkClient all the time like this?
             orchestratorManager.ProcessMessage(entity.ToMessage(), ProtocolType.Tcp, null, new NetworkClient(TCPClient, LocalHubInfo.InternalAddresses[0].ToString()));
@@ -311,6 +315,10 @@ namespace Blockcore.Platform.Tests.Fakes
 
         public void SendMessageToOrchestratorUDP(IBaseEntity entity)
         {
+            // Simulate serialization.
+            byte[] data = messageSerializer.Serialize(entity.ToMessage());
+            var message = messageSerializer.Deserialize(data);
+
             var endpoint = this.ServerEndpoint;
             orchestratorManager.ProcessMessage(entity.ToMessage(), ProtocolType.Udp, endpoint, new NetworkClient(TCPClient, LocalHubInfo.InternalAddresses[0].ToString()));
         }
@@ -326,8 +334,12 @@ namespace Blockcore.Platform.Tests.Fakes
             var hub = orchestrator.GetHubManager(endpoint);
 
             if (hub != null)
-            { 
-                hub.MessageProcessing.Process(entity.ToMessage(), ProtocolType.Udp, endpoint, new NetworkClient(TCPClient, LocalHubInfo.InternalAddresses[0].ToString()));
+            {
+                // Simulate serialization.
+                byte[] data = messageSerializer.Serialize(entity.ToMessage());
+                var message = messageSerializer.Deserialize(data);
+
+                hub.MessageProcessing.Process(message, ProtocolType.Udp, endpoint, new NetworkClient(TCPClient, LocalHubInfo.InternalAddresses[0].ToString()));
             }
         }
     }

@@ -103,7 +103,11 @@ namespace Blockcore.Platform.Tests.Fakes
 
             if (hub != null)
             {
-                hub.MessageProcessing.Process(entity.ToMessage(), ProtocolType.Tcp);
+                // Simulate serialization.
+                byte[] data = messageSerializer.Serialize(entity.ToMessage());
+                var message = messageSerializer.Deserialize(data);
+
+                hub.MessageProcessing.Process(message, ProtocolType.Tcp);
             }
 
             //if (client != null && client.Connected)
@@ -122,7 +126,11 @@ namespace Blockcore.Platform.Tests.Fakes
 
             if (hub != null)
             {
-                hub.MessageProcessing.Process(entity.ToMessage(), ProtocolType.Udp, UdpEndpoint);
+                // Simulate serialization.
+                byte[] data = messageSerializer.Serialize(entity.ToMessage());
+                var message = messageSerializer.Deserialize(data);
+
+                hub.MessageProcessing.Process(message, ProtocolType.Udp, UdpEndpoint);
             }
 
             //byte[] Bytes = messageSerializer.Serialize(entity.ToMessage());
@@ -135,7 +143,11 @@ namespace Blockcore.Platform.Tests.Fakes
 
             if (hub != null)
             {
-                hub.MessageProcessing.Process(entity.ToMessage(), ProtocolType.Udp);
+                // Simulate serialization.
+                byte[] data = messageSerializer.Serialize(entity.ToMessage());
+                var message = messageSerializer.Deserialize(data);
+
+                hub.MessageProcessing.Process(message, ProtocolType.Udp);
             }
         }
 
