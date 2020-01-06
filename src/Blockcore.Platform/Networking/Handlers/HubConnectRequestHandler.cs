@@ -7,12 +7,12 @@ using System.Net.Sockets;
 
 namespace Blockcore.Platform.Networking.Handlers
 {
-    public class ReqMessageHandler : IMessageHandler, IHandle<ReqMessage>
+    public class HubConnectRequestHandler : IMessageHandler, IHandle<HubConnectRequestMessage>
     {
         private readonly Hub events;
         private readonly IHubManager manager;
 
-        public ReqMessageHandler(PubSub.Hub events, IHubManager manager)
+        public HubConnectRequestHandler(PubSub.Hub events, IHubManager manager)
         {
             this.events = events;
             this.manager = manager;
@@ -20,8 +20,8 @@ namespace Blockcore.Platform.Networking.Handlers
 
         public void Process(BaseMessage message, ProtocolType Protocol, IPEndPoint endpoint = null, NetworkClient client = null)
         {
-            ReqMessage msg = (ReqMessage)message;
-            HubInfo hubInfo = manager.Connections.GetConnection(msg.RecipientId);
+            HubConnectRequestMessage msg = (HubConnectRequestMessage)message;
+            HubInfo hubInfo = manager.Connections.GetConnection(msg.TargetId);
 
             if (hubInfo != null)
             {
@@ -31,8 +31,17 @@ namespace Blockcore.Platform.Networking.Handlers
 
                 if (ResponsiveEP != null)
                 {
-                    events.Publish(new HubConnectionStartedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage(), Endpoint = ResponsiveEP.ToString() });
-                    events.Publish(new ConnectionUpdatedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage() });
+                    events.Publish(new HubConnectionStartedEvent() { 
+                        TargetId = msg.TargetId,
+                        OriginId = msg.Id,
+                        Data = (HubInfoMessage)hubInfo.ToMessage(), 
+                        Endpoint = ResponsiveEP.ToString() });;
+
+                    events.Publish(new ConnectionUpdatedEvent() {
+                        TargetId = msg.TargetId,
+                        OriginId = msg.Id,
+                        Data = (HubInfoMessage)hubInfo.ToMessage()
+                    });
                 }
             }
         }

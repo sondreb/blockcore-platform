@@ -10,9 +10,9 @@ namespace Blockcore.Platform.Networking
     {
         IMessageProcessingBase MessageProcessing { get; set; }
 
-        void ConnectGateway(string server);
+        void ConnectOrchestrator(string server);
 
-        void DisconnectGateway();
+        void DisconnectOrchestrator(bool disconnectFromHubs);
 
         void SendMessageToOrchestratorTCP(IBaseEntity entity);
 

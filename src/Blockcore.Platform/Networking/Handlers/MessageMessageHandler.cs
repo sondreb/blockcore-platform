@@ -7,12 +7,12 @@ using System.Net.Sockets;
 
 namespace Blockcore.Platform.Networking.Handlers
 {
-    public class MessageMessageHandler : IMessageHandler, IHandle<MessageMessage>
+    public class ChatMessageHandler : IMessageHandler, IHandle<ChatMessage>
     {
         private readonly Hub events;
         private readonly IHubManager connectionManager;
 
-        public MessageMessageHandler(PubSub.Hub events, IHubManager connectionManager)
+        public ChatMessageHandler(PubSub.Hub events, IHubManager connectionManager)
         {
             this.events = events;
             this.connectionManager = connectionManager;
@@ -20,7 +20,7 @@ namespace Blockcore.Platform.Networking.Handlers
 
         public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, NetworkClient client = null)
         {
-            MessageMessage msg = (MessageMessage)message;
+            ChatMessage msg = (ChatMessage)message;
 
             // Publish the event on the local event hub.
             //hub.Publish(new MessageReceivedEvent() { From = msg.From, To = msg.To, Content = msg.Content });
@@ -29,12 +29,12 @@ namespace Blockcore.Platform.Networking.Handlers
             // TODO: Debug and figure out what to do here.
             if (string.IsNullOrWhiteSpace(msg.Id))
             {
-                events.Publish(new MessageReceivedEvent() { Data = new Message(msg) });
+                events.Publish(new MessageReceivedEvent() { Data = new Chat(msg) });
                 //OnResultsUpdate.Invoke(this, msg.From + ": " + msg.Content);
             }
             else if (endpoint != null & client != null)
             {
-                events.Publish(new MessageReceivedEvent() { Data = new Message(msg) });
+                events.Publish(new MessageReceivedEvent() { Data = new Chat(msg) });
                 //OnMessageReceived.Invoke(EP, new MessageReceivedEventArgs(CI, new Message(m), EP));
             }
         }

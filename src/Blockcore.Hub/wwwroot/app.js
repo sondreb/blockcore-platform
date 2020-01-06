@@ -79,14 +79,13 @@ function connect() {
     send('ConnectGateway', { Server: elm('server').value });
 }
 
-function disconnect() {
-    send('DisconnectGateway');
+function disconnect(disconnectHubs) {
+    send('DisconnectGateway', { DisconnectHubs: disconnectHubs });
 }
 
 function connectToHub() {
     send('ConnectHub', { Id: window.selectedHub.Id });
 }
-
 
 
 let hubs = [];

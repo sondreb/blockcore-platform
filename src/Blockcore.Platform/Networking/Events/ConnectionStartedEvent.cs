@@ -7,5 +7,9 @@ namespace Blockcore.Platform.Networking.Events
         public HubInfoMessage Data { get; set; }
 
         public string Endpoint { get; set; }
+
+        public string OriginId { get; set; }
+
+        public string TargetId { get; set; }
     }
 }

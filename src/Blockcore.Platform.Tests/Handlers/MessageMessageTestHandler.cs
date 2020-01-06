@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Blockcore.Platform.Tests.Handlers
 {
-    public class MessageMessageTestHandler : IMessageHandler, IHandle<MessageMessage>
+    public class MessageMessageTestHandler : IMessageHandler, IHandle<ChatMessage>
     {
         public void Process(BaseMessage message, ProtocolType protocol, IPEndPoint endpoint = null, NetworkClient client = null)
         {

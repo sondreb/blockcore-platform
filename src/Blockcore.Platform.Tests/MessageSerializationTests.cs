@@ -103,8 +103,8 @@ namespace Blockcore.Platform.Tests
         public void CheckParsingMillionLargeMessages()
         {
             var maps = new MessageMaps();
-            maps.AddCommand(MessageTypes.MSG, new Map() { Command = MessageTypes.MSG, MessageType = typeof(MessageMessage) });
-            maps.AddHandler(MessageTypes.MSG, new MessageMessageTestHandler());
+            maps.AddCommand(MessageTypes.CHAT, new Map() { Command = MessageTypes.CHAT, MessageType = typeof(ChatMessage) });
+            maps.AddHandler(MessageTypes.CHAT, new MessageMessageTestHandler());
             var serializer = new MessageSerializer(maps);
 
             Stopwatch watch = new Stopwatch();
@@ -117,7 +117,7 @@ namespace Blockcore.Platform.Tests
 
             for (int i = 0; i < count; i++)
             {
-                var msg = new MessageMessage()
+                var msg = new ChatMessage()
                 {
                     From = "USER1",
                     To = "USER2",

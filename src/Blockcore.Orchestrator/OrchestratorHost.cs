@@ -47,7 +47,7 @@ namespace Blockcore.Orchestrator
             Setup();
 
             Task tcpTask = Task.Run(() => {
-                TcpWorker(token);
+                TcpWorkerAsync(token);
             }, token);
 
             Task udTask = Task.Run(() => {
@@ -61,42 +61,53 @@ namespace Blockcore.Orchestrator
             manager.BroadcastTCP(new Notification(NotificationsTypes.ServerShutdown, null));
         }
 
-        private void TcpWorker(CancellationToken token)
+        private async Task TcpWorkerAsync(CancellationToken token)
         {
             manager.StartTcp();
+
+            this.log.LogDebug("Accepting incoming connections.");
 
             while (!token.IsCancellationRequested)
             {
                 try
                 {
-                    TcpClient newClient = manager.Tcp.AcceptTcpClient();
+                    TcpClient client = await this.manager.Tcp.AcceptTcpClientAsync().WithCancellationAsync(token).ConfigureAwait(false);
 
-                    Action<object> processData = new Action<object>(delegate (object tcp)
-                    {
-                        TcpClient client = (TcpClient)tcp;
+                    Task tcpTask = Task.Run(() => {
                         client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
 
-                        while (client.Connected)
+                        var network = new NetworkClient(client);
+
+                        using (var stream = client.GetStream())
                         {
-                            try
+                            while (client.Connected)
                             {
-                                // Retrieve the message from the network stream. This will handle everything from message headers, body and type parsing.
-                                var message = messageSerializer.Deserialize(client.GetStream());
-                                this.manager.ProcessMessage(message, ProtocolType.Tcp, null, new NetworkClient(client));
-                                //messageProcessing.Process(message, ProtocolType.Tcp, null, client);
-                            }
-                            catch (Exception ex)
-                            {
-                                this.log.LogError(ex, "Failed to process incoming message.");
-                                manager.Disconnect(client);
+                                try
+                                {
+                                    // Retrieve the message from the network stream. This will handle everything from message headers, body and type parsing.
+                                    var message = messageSerializer.Deserialize(stream);
+
+                                    this.manager.ProcessMessage(message, ProtocolType.Tcp, null, network);
+                                }
+                                catch (Exception ex)
+                                {
+                                    this.log.LogError(ex, "Failed to process incoming message.");
+                                    manager.Disconnect(client);
+                                    return;
+                                }
                             }
                         }
 
                         manager.Disconnect(client);
-                    });
+                    }, token);
 
-                    Thread threadProcessData = new Thread(new ParameterizedThreadStart(processData));
-                    threadProcessData.Start(newClient);
+                    //Action<object> processData = new Action<object>(delegate (object tcp)
+                    //{
+
+                    //});
+
+                    //Thread threadProcessData = new Thread(new ParameterizedThreadStart(processData));
+                    //threadProcessData.Start(tcpClient);
                 }
                 catch (Exception ex)
                 {

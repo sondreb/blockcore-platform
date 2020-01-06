@@ -122,7 +122,12 @@ namespace Blockcore.Hub
             events.Subscribe<HubConnectionStartedEvent>(this, e =>
             {
                 log.LogInformation("ConnectionStartedEvent on Endpoint: {Endpoint} and ExternalEndpoint: {ExternalEndpoint} between Self: {Id} and {ExternalId}.", e.Endpoint, e.Data.ExternalEndpoint, Identity.Id, e.Data.Id);
-                ConnectedHubs.Add(e.Data.Id, new HubInfo(e.Data));
+
+                // Find the connecting HubInfo from the AvailableHubs, based on the event parameter. The HubInfo (Data property) available on the event is our own.
+                var originHub = this.AvailableHubs[e.OriginId];
+                
+                ConnectedHubs.Add(e.OriginId, originHub);
+
             });
 
             events.Subscribe<ConnectionStartingEvent>(this, e =>
@@ -140,7 +145,7 @@ namespace Blockcore.Hub
                 log.LogInformation("Connected to Gateway");
             });
 
-            events.Subscribe<GatewayShutdownEvent>(this, e =>
+            events.Subscribe<OrchestratorShutdownEvent>(this, e =>
             {
                 log.LogInformation("Disconnected from Gateway");
             });
@@ -161,7 +166,7 @@ namespace Blockcore.Hub
 
             events.Subscribe<DisconnectGatewayAction>(this, e =>
             {
-                this.manager.DisconnectGateway();
+                this.manager.DisconnectOrchestrator(e.DisconnectHubs);
             });
 
             events.Subscribe<ConnectHubAction>(this, e =>
@@ -175,12 +180,12 @@ namespace Blockcore.Hub
         /// </summary>
         public void Connect(string server)
         {
-            manager.ConnectGateway(server);
+            manager.ConnectOrchestrator(server);
         }
 
         public void Stop()
         {
-            this.manager.DisconnectGateway();
+            this.manager.DisconnectOrchestrator(true);
         }
 
         public void ConnectToHub(string id)

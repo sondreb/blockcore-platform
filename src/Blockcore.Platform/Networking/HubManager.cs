@@ -24,7 +24,6 @@ namespace Blockcore.Platform.Networking
         private IPAddress internetAccessAdapter;
         private TcpClient TCPClient = new TcpClient();
         private UdpClient UDPClient = new UdpClient();
-        private Thread ThreadTCPListen;
         private Thread ThreadUDPListen;
         private bool _TCPListen = false;
 
@@ -34,8 +33,11 @@ namespace Blockcore.Platform.Networking
             set
             {
                 _TCPListen = value;
+
                 if (value)
+                {
                     ListenTCP();
+                }
             }
         }
 
@@ -93,7 +95,7 @@ namespace Blockcore.Platform.Networking
             }
         }
 
-        public void ConnectGateway(string server)
+        public void ConnectOrchestrator(string server)
         {
             try
             {
@@ -121,10 +123,12 @@ namespace Blockcore.Platform.Networking
                 // kept open and orchestrator knows we've not shut down.
                 Thread keepAlive = new Thread(new ThreadStart(delegate
                 {
+                    var keepAliveMessage = new KeepAlive();
+
                     while (TCPClient.Connected)
                     {
                         Thread.Sleep(5000);
-                        SendMessageToOrchestratorTCP(new KeepAlive());
+                        SendMessageToOrchestratorTCP(keepAliveMessage);
                     }
                 }));
 
@@ -140,9 +144,9 @@ namespace Blockcore.Platform.Networking
             }
         }
 
-        public void DisconnectGateway()
+        public void DisconnectOrchestrator(bool disconnectFromHubs)
         {
-            UDPListen = false;
+            UDPListen = !disconnectFromHubs; // If we want to keep hubs open, we'll keep UDP listening on.
             TCPListen = false;
 
             if (TCPClient.Connected)
@@ -150,8 +154,12 @@ namespace Blockcore.Platform.Networking
                 TCPClient.Client.Disconnect(true);
             }
 
-            Connections.ClearConnections();
-            events.Publish(new GatewayDisconnectedEvent());
+            if (disconnectFromHubs)
+            {
+                Connections.ClearConnections();
+            }
+
+            events.Publish(new OrchestratorDisconnectedEvent());
         }
 
         private IPAddress GetAdapterWithInternetAccess()
@@ -279,29 +287,46 @@ namespace Blockcore.Platform.Networking
 
         private void ListenTCP()
         {
-            ThreadTCPListen = new Thread(new ThreadStart(delegate
+            var tcpListenerThread = new Thread(new ThreadStart(delegate
             {
-                while (TCPListen)
-                {
-                    try
-                    {
-                        // Retrieve the message from the network stream. This will handle everything from message headers, body and type parsing.
-                        var message = messageSerializer.Deserialize(TCPClient.GetStream());
+                var network = new NetworkClient(TCPClient);
 
-                        //messageProcessing.Process(message, ProtocolType.Tcp, null, TCPClient);
-                        MessageProcessing.Process(message, ProtocolType.Tcp);
-                    }
-                    catch (Exception ex)
+                using (var stream = TCPClient.GetStream())
+                {
+                    while (TCPListen)
                     {
-                        this.log.LogError("Error on TCP Receive", ex);
+                        try
+                        {
+                            // Retrieve the message from the network stream. This will handle everything from message headers, body and type parsing.
+                            var message = messageSerializer.Deserialize(stream);
+
+                            MessageProcessing.Process(message, ProtocolType.Tcp, null, network);
+                        }
+                        catch (System.IO.EndOfStreamException endex)
+                        {
+                            if (!TCPListen)
+                            {
+                                log.LogInformation("Received EndOfStreamException, but TCPListen was set to false, performing a graceful disconnect.");
+                            }
+                            else
+                            {
+                                log.LogError("Received EndOfStreamException while TCPListen was true.", endex);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            log.LogError("Error on TCP Receive.", ex);
+                        }
                     }
                 }
             }));
 
-            ThreadTCPListen.IsBackground = true;
+            tcpListenerThread.IsBackground = true;
 
             if (TCPListen)
-                ThreadTCPListen.Start();
+            {
+                tcpListenerThread.Start();
+            }
         }
 
         public void ConnectToClient(string id)
@@ -312,7 +337,7 @@ namespace Blockcore.Platform.Networking
 
         public void ConnectToClient(HubInfo hubInfo)
         {
-            Req req = new Req(LocalHubInfo.Id, hubInfo.Id);
+            HubConnectRequest req = new HubConnectRequest(LocalHubInfo.Id, hubInfo.Id);
 
             // Send a message to the orchestrator, telling the target hub that we would like to connect.
             SendMessageToOrchestratorTCP(req);

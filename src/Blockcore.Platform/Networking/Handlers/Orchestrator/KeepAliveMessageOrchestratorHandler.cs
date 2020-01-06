@@ -5,12 +5,12 @@ using System.Net.Sockets;
 
 namespace Blockcore.Platform.Networking.Handlers
 {
-    public class KeepAliveMessageGatewayHandler : IMessageOrchestratorHandler, IHandle<KeepAliveMessage>
+    public class KeepAliveMessageOrchestratorHandler : IMessageOrchestratorHandler, IHandle<KeepAliveMessage>
     {
-        private readonly ILogger<InfoMessageGatewayHandler> log;
+        private readonly ILogger<HubInfoMessageOrchestratorHandler> log;
         private readonly IOrchestratorManager manager;
 
-        public KeepAliveMessageGatewayHandler(ILogger<InfoMessageGatewayHandler> log, IOrchestratorManager manager)
+        public KeepAliveMessageOrchestratorHandler(ILogger<HubInfoMessageOrchestratorHandler> log, IOrchestratorManager manager)
         {
             this.log = log;
             this.manager = manager;

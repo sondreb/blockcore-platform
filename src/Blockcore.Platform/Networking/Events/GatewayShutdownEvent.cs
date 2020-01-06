@@ -1,6 +1,6 @@
 ﻿namespace Blockcore.Platform.Networking.Events
 {
-    public class GatewayShutdownEvent : IEvent
+    public class OrchestratorShutdownEvent : IEvent
     {
     }
 }

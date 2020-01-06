@@ -33,9 +33,15 @@ namespace Blockcore.Platform
             this.mnemonic = mnemonic;
 
             this.masterNode = mnemonic.DeriveExtKey();
+            
+            // We should persist the extpubkey from the wallet root, and
+            // persist the extkey for identity. Both must be stored encrypted on disk, either
+            // using a password from the user, or by relying on TPM module, etc.
+            // this.walletRoot = masterNode.Derive(new KeyPath("m/44'")).Neuter();
+            // this.identityRoot = masterNode.Derive(new KeyPath("m/302'"));
 
             this.identity = masterNode.Derive(new KeyPath("m/302'")).Derive(index, true);
-            //this.identity = masterNode.Derive(new KeyPath("m/302'/0'"));
+            // this.identity = masterNode.Derive(new KeyPath("m/302'/0'"));
 
             // The default for keys is to be compressed, making it 33 bytes as oppose to 65.
             this.identityPubKey = this.identity.GetPublicKey();

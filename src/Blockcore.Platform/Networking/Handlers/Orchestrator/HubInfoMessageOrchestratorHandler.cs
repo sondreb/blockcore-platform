@@ -7,12 +7,12 @@ using System.Net.Sockets;
 
 namespace Blockcore.Platform.Networking.Handlers
 {
-    public class InfoMessageGatewayHandler : IMessageOrchestratorHandler, IHandle<HubInfoMessage>
+    public class HubInfoMessageOrchestratorHandler : IMessageOrchestratorHandler, IHandle<HubInfoMessage>
     {
-        private readonly ILogger<InfoMessageGatewayHandler> log;
+        private readonly ILogger<HubInfoMessageOrchestratorHandler> log;
         private readonly IOrchestratorManager manager;
 
-        public InfoMessageGatewayHandler(ILogger<InfoMessageGatewayHandler> log, IOrchestratorManager manager)
+        public HubInfoMessageOrchestratorHandler(ILogger<HubInfoMessageOrchestratorHandler> log, IOrchestratorManager manager)
         {
             this.log = log;
             this.manager = manager;
@@ -93,10 +93,10 @@ namespace Blockcore.Platform.Networking.Handlers
             if (!hubInfo.Initialized)
             {
                 if (hubInfo.ExternalEndpoint != null & protocol == ProtocolType.Udp)
-                    manager.SendUDP(new Message("Server", hubInfo.Name, "UDP Communication Test", string.Empty), hubInfo.ExternalEndpoint);
+                    manager.SendUDP(new Chat("Server", hubInfo.Name, "UDP Communication Test", string.Empty), hubInfo.ExternalEndpoint);
 
                 if (hubInfo.Client != null & protocol == ProtocolType.Tcp)
-                    manager.SendTCP(new Message("Server", hubInfo.Name, "TCP Communication Test", string.Empty), hubInfo.Client);
+                    manager.SendTCP(new Chat("Server", hubInfo.Name, "TCP Communication Test", string.Empty), hubInfo.Client);
 
                 if (hubInfo.Client != null & hubInfo.ExternalEndpoint != null)
                 {

@@ -105,25 +105,24 @@ namespace Blockcore.Platform.Tests
             orchestrator.Setup();
 
             var host1 = CreateHubHost();
+            var host2 = CreateHubHost();
+            var host3 = CreateHubHost();
+
             var hub1 = host1.GetService<HubHost>();
+            var hub2 = host2.GetService<HubHost>();
+            var hub3 = host3.GetService<HubHost>();
+
+            Assert.NotEqual(hub1, hub2);
+
             var identity = new Identity("obtain design mistake life call inside smooth gloom sunset bless winter tenant");
             
             // Configure all events and everything for this hub.
             hub1.Setup(identity, CancellationToken.None);
-
-            var host2 = CreateHubHost();
-            var hub2 = host2.GetService<HubHost>();
-            Assert.NotEqual(hub1, hub2);
-
             hub2.Setup(identity.GetIdentity(1), CancellationToken.None);
+            hub3.Setup(new Identity(), CancellationToken.None); // Generate a hub with random identity.
 
             Assert.Equal("4b9715afa903c82b383abb74b6cd746bdd3beea3", hub1.Identity.Id);
             Assert.Equal("309f0653f0bbc77c699b8920f263d65122c32740", hub2.Identity.Id);
-
-            // Generate a hub with random identity.
-            var host3 = CreateHubHost();
-            var hub3 = host3.GetService<HubHost>();
-            hub3.Setup(new Identity(), CancellationToken.None);
 
             // Make hub1 trust hub2.
             hub1.TrustedHubs.Add(hub2.Identity.Id);
@@ -142,9 +141,28 @@ namespace Blockcore.Platform.Tests
 
             // Connect from hub2 to hub1, this should go automatic due to existing trust.
             hub2.ConnectToHub(hub1.Identity.Id);
+            
+            Assert.Equal(1, hub1.ConnectedHubs.Count);
+            Assert.Equal(1, hub2.ConnectedHubs.Count);
 
-            hub2.SendMessageToHub(new Message("Joe", "Sara", "Hi there! How are you?", hub1.Identity.Id), hub1.Identity.Id);
-            //hub1.SendMessageToHub(new Message("Sara", "Joe", "Hi again! I'm just fine!"), hub2.Identity.Id);
+            hub2.SendMessageToHub(new Chat("Joe", "Sara", "Hi there! How are you?", hub1.Identity.Id), hub1.Identity.Id);
+            hub1.SendMessageToHub(new Chat("Sara", "Joe", "Hi again! I'm just fine!", hub2.Identity.Id), hub2.Identity.Id);
+
+            hub2.SendMessageToHub(new Chat("Joe", "Sara", "Hi there! How are you?", hub1.Identity.Id), hub1.Identity.Id);
+            hub2.SendMessageToHub(new Chat("Joe", "Sara", "Hi there! How are you?", hub1.Identity.Id), hub1.Identity.Id);
+            hub2.SendMessageToHub(new Chat("Joe", "Sara", "Hi there! How are you?", hub1.Identity.Id), hub1.Identity.Id);
+
+            hub1.SendMessageToHub(new Chat("Sara", "Joe", "Hi again! I'm just fine!", hub2.Identity.Id), hub2.Identity.Id);
+            hub1.SendMessageToHub(new Chat("Sara", "Joe", "Hi again! I'm just fine!", hub2.Identity.Id), hub2.Identity.Id);
+            hub1.SendMessageToHub(new Chat("Sara", "Joe", "Hi again! I'm just fine!", hub2.Identity.Id), hub2.Identity.Id);
+
+            // How hub3 will connect to hub1. This will result in an connect request on hub1 that must be approved.
+            hub3.ConnectToHub(hub1.Identity.Id);
+
+
+
+
+
         }
 
         [Fact]

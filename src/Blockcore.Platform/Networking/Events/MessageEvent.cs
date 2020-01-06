@@ -10,6 +10,6 @@ namespace Blockcore.Platform.Networking.Events
 
         public string Content { get; set; }
 
-        public Message Data { get; set; }
+        public Chat Data { get; set; }
     }
 }

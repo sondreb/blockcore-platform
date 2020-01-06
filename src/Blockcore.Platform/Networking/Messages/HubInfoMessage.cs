@@ -6,7 +6,7 @@ namespace Blockcore.Platform.Networking.Messages
     [MessagePackObject]
     public class HubInfoMessage : BaseMessage
     {
-        public override ushort Command => MessageTypes.INFO;
+        public override ushort Command => MessageTypes.HUBINFO;
 
         [Key(1)]
         public string Name { get; set; }

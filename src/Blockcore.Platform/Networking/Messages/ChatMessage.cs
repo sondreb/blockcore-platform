@@ -3,9 +3,9 @@
 namespace Blockcore.Platform.Networking.Messages
 {
     [MessagePackObject]
-    public class MessageMessage: BaseMessage
+    public class ChatMessage: BaseMessage
     {
-        public override ushort Command => MessageTypes.MSG;
+        public override ushort Command => MessageTypes.CHAT;
 
         [Key(1)]
         public string From { get; set; }
@@ -19,12 +19,12 @@ namespace Blockcore.Platform.Networking.Messages
         [Key(4)]
         public string RecipientId { get; set; }
 
-        public MessageMessage()
+        public ChatMessage()
         {
 
         }
 
-        public MessageMessage(string from, string to, string content, string recipientId)
+        public ChatMessage(string from, string to, string content, string recipientId)
         {
             From = from;
             To = to;

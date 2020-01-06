@@ -95,7 +95,7 @@ namespace Blockcore.Platform.Tests.Fakes
             this.orchestratorManager = orchestratorManager;
         }
 
-        public void ConnectGateway(string server)
+        public void ConnectOrchestrator(string server)
         {
             this.ServerEndpoint = IPEndPoint.Parse(server);
 
@@ -156,7 +156,7 @@ namespace Blockcore.Platform.Tests.Fakes
 
         public void ConnectToClient(HubInfo hubInfo)
         {
-            Req req = new Req(LocalHubInfo.Id, hubInfo.Id);
+            HubConnectRequest req = new HubConnectRequest(LocalHubInfo.Id, hubInfo.Id);
 
             SendMessageToOrchestratorTCP(req);
 
@@ -168,7 +168,11 @@ namespace Blockcore.Platform.Tests.Fakes
             {
                 this.log.LogInformation("Connection Successfull to: " + responsiveEndpoint.ToString());
 
-                events.Publish(new HubConnectionStartedEvent() { Data = (HubInfoMessage)hubInfo.ToMessage(), Endpoint = responsiveEndpoint.ToString() });
+                events.Publish(new HubConnectionStartedEvent() { 
+                    OriginId = hubInfo.Id,
+                    TargetId = LocalHubInfo.Id,
+                    Data = (HubInfoMessage)hubInfo.ToMessage(), 
+                    Endpoint = responsiveEndpoint.ToString() });
             }
 
             //Thread connect = new Thread(new ThreadStart(delegate
@@ -188,7 +192,7 @@ namespace Blockcore.Platform.Tests.Fakes
             //connect.Start();
         }
 
-        public void DisconnectGateway()
+        public void DisconnectOrchestrator(bool disconnectFromHubs)
         {
             throw new NotImplementedException();
         }

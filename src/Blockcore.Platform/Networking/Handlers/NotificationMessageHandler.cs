@@ -6,12 +6,12 @@ using System.Net.Sockets;
 
 namespace Blockcore.Platform.Networking.Handlers
 {
-    public class NotificationMessageHandler : IMessageHandler, IHandle<NotificationMessage>
+    public class NotificationHandler : IMessageHandler, IHandle<NotificationMessage>
     {
         private readonly Hub events;
         private readonly IHubManager manager;
 
-        public NotificationMessageHandler(PubSub.Hub events, IHubManager manager)
+        public NotificationHandler(PubSub.Hub events, IHubManager manager)
         {
             this.events = events;
             this.manager = manager;
@@ -33,8 +33,8 @@ namespace Blockcore.Platform.Networking.Handlers
             }
             else if (item.Type == NotificationsTypes.ServerShutdown)
             {
-                manager.DisconnectGateway();
-                events.Publish(new GatewayShutdownEvent());
+                manager.DisconnectOrchestrator(false);
+                events.Publish(new OrchestratorShutdownEvent());
             }
         }
     }

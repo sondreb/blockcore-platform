@@ -2,5 +2,6 @@
 {
     public class DisconnectGatewayAction : IAction
     {
+        public bool DisconnectHubs { get; set; }
     }
 }

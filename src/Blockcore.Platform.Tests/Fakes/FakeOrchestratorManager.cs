@@ -104,10 +104,12 @@ namespace Blockcore.Platform.Tests.Fakes
             if (hub != null)
             {
                 // Simulate serialization.
-                byte[] data = messageSerializer.Serialize(entity.ToMessage());
-                var message = messageSerializer.Deserialize(data);
+                //byte[] data = messageSerializer.Serialize(entity.ToMessage());
+                //var message = messageSerializer.Deserialize(data);
+                
+                // Temporarily disable the faking of serialization, due to the orchestrator needing to know the type.
 
-                hub.MessageProcessing.Process(message, ProtocolType.Tcp);
+                hub.MessageProcessing.Process(entity.ToMessage(), ProtocolType.Tcp);
             }
 
             //if (client != null && client.Connected)
