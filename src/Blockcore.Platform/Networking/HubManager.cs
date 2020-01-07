@@ -19,7 +19,13 @@ namespace Blockcore.Platform.Networking
 
         public HubInfo LocalHubInfo { get; }
 
+        public List<string> TrustedHubs { get; }
+
+        public List<HubHandshake> HubRequests { get; }
+
         public List<Ack> AckResponces { get; }
+
+        public Identity Identity { get; set; }
 
         private IPAddress internetAccessAdapter;
         private TcpClient TCPClient = new TcpClient();
@@ -76,6 +82,8 @@ namespace Blockcore.Platform.Networking
             this.Connections = connectionManager;
 
             this.LocalHubInfo = new HubInfo();
+            this.TrustedHubs = new List<string>();
+            this.HubRequests = new List<HubHandshake>();
             this.AckResponces = new List<Ack>();
 
             UDPClient.AllowNatTraversal(true);
@@ -84,7 +92,7 @@ namespace Blockcore.Platform.Networking
 
             LocalHubInfo.Name = Environment.MachineName;
             LocalHubInfo.ConnectionType = ConnectionTypes.Unknown;
-            LocalHubInfo.Id = DateTime.Now.Ticks.ToString();
+            //LocalHubInfo.Id = DateTime.Now.Ticks.ToString();
 
             var IPs = Dns.GetHostEntry(Dns.GetHostName()).AddressList.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork);
 

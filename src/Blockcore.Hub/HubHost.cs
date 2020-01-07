@@ -3,7 +3,9 @@ using Blockcore.Platform.Networking;
 using Blockcore.Platform.Networking.Actions;
 using Blockcore.Platform.Networking.Entities;
 using Blockcore.Platform.Networking.Events;
+using Blockcore.Platform.Networking.Exceptions;
 using Microsoft.Extensions.Logging;
+using NBitcoin;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -17,7 +19,7 @@ namespace Blockcore.Hub
         private readonly IHubManager manager;
         private readonly PubSub.Hub events;
 
-        public List<string> TrustedHubs { get; }
+        public IHubManager Manager { get { return manager; } }
 
         public Dictionary<string, HubInfo> AvailableHubs { get; }
 
@@ -39,14 +41,18 @@ namespace Blockcore.Hub
             // Due to circular dependency, we must manually set the MessageProcessing on the Manager.
             this.manager.MessageProcessing = this.messageProcessing;
 
-            TrustedHubs = new List<string>();
+            
             AvailableHubs = new Dictionary<string, HubInfo>();
             ConnectedHubs = new Dictionary<string, HubInfo>();
         }
 
         public void Setup(Identity identity, CancellationToken token)
         {
+            // Make the identity availble on the HubHost.
             this.Identity = identity;
+
+            // Appears we also must have the identity in the HubManager.
+            this.manager.Identity = identity;
 
             // Put the public key on the Id of the HubInfo instance.
             this.manager.LocalHubInfo.Id = Identity.Id;
@@ -191,6 +197,31 @@ namespace Blockcore.Hub
         public void ConnectToHub(string id)
         {
             this.manager.ConnectToClient(id);
+        }
+
+        public void InitiateHubConnection(string id)
+        {
+            var hubInfo = this.AvailableHubs[id];
+
+            if (hubInfo == null)
+            {
+                throw new PlatformException($"Unable to find the hub to initiate a connection with. Specified ID is {id}.");
+            }
+
+            HubHandshake msg = new HubHandshake(Identity.Id, hubInfo.Id);
+
+            // TODO: Here we must construct the full handshake request, and sign that message.
+            // We must also share an symmetric encryption key to be used for future message exchange.
+
+            // Restore the public key from the shared value.
+            
+            
+            var publicKey = new PubKey(hubInfo.Id);
+            var payload = "hello";
+            var cipher = publicKey.Encrypt(payload); // Encrypt the request with the public key of the receiver.
+            msg.Payload = cipher;
+
+            manager.SendMessageToOrchestratorTCP(msg);
         }
 
         public void SendMessageToHub(IBaseEntity entity, HubInfo hub)

@@ -48,6 +48,21 @@ namespace Blockcore.Platform
 
             this.FingerPrint = this.identityPubKey.GetHDFingerPrint();
             this.Id = this.identityPubKey.Hash.ToString();
+
+            var test = this.identityPubKey.ToHex();
+
+            var keyId = new KeyId(Id);
+
+            Base58Data data = new Base58Data();
+            data.
+
+            var test2 = keyId.ScriptPubKey.ToHex();
+        }
+
+        public string Decrypt(string data)
+        {
+            var decryptedMessage = identity.PrivateKey.Decrypt(data);
+            return decryptedMessage;
         }
 
         public Identity GetIdentity(int index)

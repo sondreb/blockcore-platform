@@ -9,6 +9,7 @@
         public static ushort KEEPALIVE = 3;
         public static ushort NOTIFY = 4;
         public static ushort CONNECT_REQUEST = 5;
+        public static ushort CONNECT_APPROVAL = 6;
         public static ushort TEST = 999;
         public static ushort NOT_FOUND = 404;
     }

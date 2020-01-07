@@ -125,7 +125,7 @@ namespace Blockcore.Platform.Tests
             Assert.Equal("309f0653f0bbc77c699b8920f263d65122c32740", hub2.Identity.Id);
 
             // Make hub1 trust hub2.
-            hub1.TrustedHubs.Add(hub2.Identity.Id);
+            hub1.Manager.TrustedHubs.Add(hub2.Identity.Id);
 
             // Now we must make our hubs connect to the orchestrator. Since we won't be doing any TCP/UDP communication,
             // we must fake the messages forwarded over the wire. The port is used to identity individual hubs in the orchestrator,
@@ -156,12 +156,12 @@ namespace Blockcore.Platform.Tests
             hub1.SendMessageToHub(new Chat("Sara", "Joe", "Hi again! I'm just fine!", hub2.Identity.Id), hub2.Identity.Id);
             hub1.SendMessageToHub(new Chat("Sara", "Joe", "Hi again! I'm just fine!", hub2.Identity.Id), hub2.Identity.Id);
 
+            hub3.InitiateHubConnection(hub1.Identity.Id);
+
             // How hub3 will connect to hub1. This will result in an connect request on hub1 that must be approved.
             hub3.ConnectToHub(hub1.Identity.Id);
 
-
-
-
+            
 
         }
 

@@ -22,7 +22,13 @@ namespace Blockcore.Platform.Tests.Fakes
 
         public HubInfo LocalHubInfo { get; }
 
+        public List<string> TrustedHubs { get; }
+
+        public List<HubHandshake> HubRequests { get; }
+
         public List<Ack> AckResponces { get; }
+
+        public Identity Identity { get; set; }
 
         public bool TCPListen { get; set; }
         public bool UDPListen { get; set; }
@@ -53,7 +59,8 @@ namespace Blockcore.Platform.Tests.Fakes
             this.Connections = connectionManager;
 
             this.LocalHubInfo = new HubInfo();
-
+            this.TrustedHubs = new List<string>();
+            this.HubRequests = new List<HubHandshake>();
             this.AckResponces = new List<Ack>();
 
             LocalHubInfo.Name = Environment.MachineName;
@@ -146,6 +153,13 @@ namespace Blockcore.Platform.Tests.Fakes
             }
 
             return null;
+        }
+
+        public void InitiateHubConnection(string id)
+        {
+            var hubInfo = this.Connections.GetConnection(id);
+            HubHandshake msg = new HubHandshake(LocalHubInfo.Id, hubInfo.Id);
+            SendMessageToOrchestratorTCP(msg);
         }
 
         public void ConnectToClient(string id)

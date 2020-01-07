@@ -42,5 +42,11 @@ namespace Blockcore.Platform.Networking
         public bool UDPListen { get; set; }
 
         ConnectionManager Connections { get; }
+
+        List<string> TrustedHubs { get; }
+
+        List<HubHandshake> HubRequests { get; }
+
+        Identity Identity { get; set; }
     }
 }
